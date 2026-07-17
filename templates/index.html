@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeForge - لوحة التحكم</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🔨 CodeForge</h1>
+            <p class="subtitle">منصة تطوير متعددة الوكلاء</p>
+        </header>
+
+        <!-- Status Section -->
+        <section class="status-section">
+            <h2>📊 حالة المنصة</h2>
+            <div class="status-grid">
+                <div class="status-card">
+                    <span class="status-label">الحالة</span>
+                    <span class="status-value" id="task-status">جاري التحميل...</span>
+                </div>
+                <div class="status-card">
+                    <span class="status-label">الوكيل النشط</span>
+                    <span class="status-value" id="active-agent">-</span>
+                </div>
+                <div class="status-card">
+                    <span class="status-label">المهام المنجزة</span>
+                    <span class="status-value" id="completed-tasks">0 / 0</span>
+                </div>
+                <div class="status-card">
+                    <span class="status-label">المرحلة</span>
+                    <span class="status-value" id="phase">Phase 4</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Task Input Section -->
+        <section class="task-section">
+            <h2>📝 مهمة جديدة</h2>
+            <form id="task-form">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="task-input" 
+                        placeholder="اكتب المهمة هنا..."
+                        required
+                    >
+                    <button type="submit" class="btn-primary">
+                        <span id="btn-text">تشغيل</span>
+                        <span id="btn-loader" class="loader" style="display: none;"></span>
+                    </button>
+                </div>
+            </form>
+            <div id="task-result" class="task-result"></div>
+        </section>
+
+        <!-- History Section -->
+        <section class="history-section">
+            <h2>📜 سجل التنفيذ</h2>
+            <div id="history-list" class="history-list">
+                <p class="loading">جاري التحميل...</p>
+            </div>
+        </section>
+
+        <!-- Error Log -->
+        <section class="error-section" id="error-section" style="display: none;">
+            <h2>❌ سجل الأخطاء</h2>
+            <div id="error-log" class="error-log"></div>
+        </section>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -80,9 +80,67 @@ class ProjectState:
     last_commit: Optional[str] = None
     last_commit_hash: Optional[str] = None
     last_commit_time: Optional[datetime] = None
-    phase: str = "phase3"
+    phase: str = "phase4"
     task_count: int = 0
+    completed_tasks: int = 0
     agent_states: dict = field(default_factory=dict)
+    execution_history: list = field(default_factory=list)
+
+    def summary(self) -> str:
+        """عرض ملخص نصي للوحة التحكم"""
+        status_text = self.task_status.value
+        agent_text = self.active_agent.value if self.active_agent else "لا يوجد"
+        
+        lines = [
+            "╔══════════════════════════════════════╗",
+            "║      لوحة تحكم CodeForge           ║",
+            "╚══════════════════════════════════════╝",
+            "",
+            f"📊 الحالة الحالية: {status_text}",
+            f"🤖 الوكيل النشط: {agent_text}",
+            f"📋 إجمالي المهام: {self.task_count}",
+            f"✅ المهام المنجزة: {self.completed_tasks}",
+            "",
+        ]
+        
+        if self.current_task:
+            lines.append(f"🔄 المهمة الحالية: {self.current_task}")
+            if self.current_task_id:
+                lines.append(f"   المعرف: {self.current_task_id}")
+        
+        if self.attempts:
+            lines.append("")
+            lines.append("📈 محاولات الوكلاء:")
+            for agent, count in self.attempts.items():
+                lines.append(f"   {agent}: {count} محاولة")
+        
+        if self.last_commit:
+            lines.append("")
+            lines.append(f"💾 آخر commit: {self.last_commit[:50]}...")
+        
+        if self.last_commit_time:
+            lines.append(f"   الوقت: {self.last_commit_time.strftime('%Y-%m-%d %H:%M')}")
+        
+        lines.append("")
+        lines.append("╔══════════════════════════════════════╗")
+        
+        return "\n".join(lines)
+    
+    def to_dict(self) -> dict:
+        """تحويل إلى dictionary للـ API"""
+        return {
+            "current_task": self.current_task,
+            "current_task_id": self.current_task_id,
+            "active_agent": self.active_agent.value if self.active_agent else None,
+            "task_status": self.task_status.value,
+            "phase": self.phase,
+            "task_count": self.task_count,
+            "completed_tasks": self.completed_tasks,
+            "last_commit": self.last_commit,
+            "last_commit_hash": self.last_commit_hash,
+            "last_commit_time": self.last_commit_time.isoformat() if self.last_commit_time else None,
+            "execution_history": self.execution_history[-10:]  # آخر 10
+        }
 
     def __post_init__(self):
         """تهيئة الوكلاء"""
@@ -155,8 +213,23 @@ class ProjectState:
             "last_commit_hash": self.last_commit_hash,
             "last_commit_time": self.last_commit_time.isoformat() if self.last_commit_time else None,
             "phase": self.phase,
-            "task_count": self.task_count
+            "task_count": self.task_count,
+            "completed_tasks": self.completed_tasks,
+            "execution_history": self.execution_history[-10:]
         }
+
+    def increment_completed_tasks(self):
+        """زيادة عدد المهام المنجزة"""
+        self.completed_tasks += 1
+
+    def add_to_history(self, task_id: str, description: str, status: str):
+        """إضافة مهمة إلى سجل التنفيذ"""
+        self.execution_history.append({
+            "task_id": task_id,
+            "description": description,
+            "status": status,
+            "timestamp": datetime.now().isoformat()
+        })
 
     @classmethod
     def from_dict(cls, data: dict) -> "ProjectState":
@@ -164,8 +237,10 @@ class ProjectState:
         state = cls()
         state.current_task = data.get("current_task")
         state.current_task_id = data.get("current_task_id")
-        state.phase = data.get("phase", "phase3")
+        state.phase = data.get("phase", "phase4")
         state.task_count = data.get("task_count", 0)
+        state.completed_tasks = data.get("completed_tasks", 0)
+        state.execution_history = data.get("execution_history", [])
         
         if data.get("last_commit_time"):
             state.last_commit_time = datetime.fromisoformat(data["last_commit_time"])
@@ -251,6 +326,29 @@ state_manager = StateManager()
 def get_state() -> ProjectState:
     """الحصول على الحالة الحالية"""
     return state_manager.get_state()
+
+
+def get_state_summary() -> str:
+    """الحصول على ملخص نصي للحالة"""
+    return state_manager.get_state().summary()
+
+
+def get_state_dict() -> dict:
+    """الحصول على الحالة كـ dictionary"""
+    return state_manager.get_state().to_dict()
+
+
+def increment_completed() -> int:
+    """زيادة عدد المهام المنجزة"""
+    state_manager.state.increment_completed_tasks()
+    state_manager.save()
+    return state_manager.state.completed_tasks
+
+
+def add_history(task_id: str, description: str, status: str):
+    """إضافة مهمة إلى السجل"""
+    state_manager.state.add_to_history(task_id, description, status)
+    state_manager.save()
 
 
 def start_new_task(description: str) -> int:

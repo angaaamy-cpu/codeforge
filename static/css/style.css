@@ -1,0 +1,278 @@
+/* CodeForge UI - Phase 4
+========================== */
+
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #1a1a2e;
+    --bg-card: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0b0;
+    --accent-cyan: #00d4ff;
+    --accent-purple: #7c3aed;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 1rem;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.header h1 {
+    font-size: 2rem;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Sections */
+section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--accent-cyan);
+}
+
+/* Status Grid */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.status-card {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.status-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.status-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Task Form */
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    direction: rtl;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-secondary);
+}
+
+.btn-primary {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 100px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loader */
+.loader {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Task Result */
+.task-result {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    display: none;
+}
+
+.task-result.success {
+    display: block;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+}
+
+.task-result.error {
+    display: block;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+}
+
+/* History List */
+.history-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    border-right: 4px solid var(--accent-cyan);
+}
+
+.history-item.completed {
+    border-right-color: var(--accent-green);
+}
+
+.history-item.failed {
+    border-right-color: var(--accent-red);
+}
+
+.history-item .task-id {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.history-item .task-desc {
+    margin: 0.5rem 0;
+}
+
+.history-item .task-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.history-item .task-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.loading {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+/* Error Log */
+.error-log {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    direction: ltr;
+    text-align: left;
+    color: var(--accent-red);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-cyan);
+    border-radius: 3px;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .btn-primary {
+        width: 100%;
+    }
+}

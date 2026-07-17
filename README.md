@@ -55,13 +55,17 @@ CodeForge هي منصة تطوير برمجيات متقدمة تستخدم ال
 - [x] ربط Gemini API
 - [x] صفحة هبوط CodeForge AI
 
-### المرحلة 3: دورة العمل + الذاكرة + Git ✅ (الحالية)
+### المرحلة 3: دورة العمل + الذاكرة + Git ✅
 - [x] دورة العمل الكاملة (Pipeline)
 - [x] الذاكرة الذكية
 - [x] إدارة Git
 - [x] المهمة الأولى: إضافة زر التواصل
 
-### المرحلة 4: واجهة الهاتف + الإنتاج 📋
+### المرحلة 4: واجهة الهاتف + أول مشروع ✅ (الحالية)
+- [x] واجهة ويب Flask
+- [x] API منفصل
+- [x] لوحة تحكم
+- [x] المشروع التجريبي: Todo App
 - [ ] تطبيق هاتف
 - [ ] أول مشروع حقيقي
 - [ ] دعم production
@@ -83,23 +87,25 @@ codeforge/
 │   ├── adr/          # Architecture Decisions
 │   │   ├── 001-initial-architecture.md
 │   │   ├── 002-first-agents.md
-│   │   └── 003-pipeline-memory-git.md
+│   │   ├── 003-pipeline-memory-git.md
+│   │   └── 004-todo-app-project.md
 │   └── reports/       # تقارير المهام
 ├── agents/            # تعريف الوكلاء
-│   ├── manager/       # Manager Agent
-│   ├── architect/     # Architect Agent
-│   ├── developer/     # Developer Agent
-│   └── qa/           # QA Agent
 ├── memory/            # طبقة الذاكرة
 ├── src/               # الكود المصدري
-│   ├── agents.py     # فريق الوكلاء (Phase 2)
-│   ├── state.py      # نظام الحالة (Phase 3)
-│   ├── memory.py     # الذاكرة الذكية (Phase 3)
-│   ├── pipeline.py   # دورة العمل (Phase 3)
-│   └── git_manager.py # إدارة Git (Phase 3)
-├── tests/             # الاختبارات
-└── workspace/         # مساحة العمل
-    └── index.html    # صفحة الهبوط
+│   ├── agents.py     # فريق الوكلاء
+│   ├── state.py      # نظام الحالة
+│   ├── memory.py     # الذاكرة الذكية
+│   ├── pipeline.py   # دورة العمل
+│   ├── git_manager.py # إدارة Git
+│   └── app.py        # Flask API (Phase 4)
+├── templates/         # قوالب Flask
+├── static/           # ملفات CSS/JS
+├── workspace/         # مساحة العمل
+│   ├── index.html    # صفحة الهبوط
+│   └── projects/     # المشاريع
+│       └── todo_app/ # المشروع التجريبي
+└── tests/             # الاختبارات
 ```
 
 ---
@@ -109,16 +115,41 @@ codeforge/
 - Python 3.11+
 - Git
 
-### للمرحلة 2+ (مُثبت)
+### Phase 4 (مُثبت)
+- Flask >= 3.0
 - CrewAI >= 1.15
 - CrewAI Tools >= 1.15
 - litellm >= 1.0
-- Gemini API Key (GEMINI_API_KEY)
+- Python Standard Library
 
-### للمرحلة 3+ (مُثبت Phase 3)
-- Python Standard Library (state, memory, pipeline, git_manager)
-- ChromaDB (مخطط لـ Phase 4)
-- OpenHands (مخطط لـ Phase 4)
+---
+
+## 🚀 التشغيل
+
+### واجهة الويب (Flask)
+
+```bash
+cd /workspace/project/codeforge
+pip install flask
+python src/app.py
+```
+
+ثم افتح: http://localhost:5000
+
+### واجهة سطر الأوامر
+
+```bash
+python src/agents.py "وصف المهمة"
+```
+
+### API
+
+| المسار | الطريقة | الوصف |
+|--------|--------|-------|
+| `/api/state` | GET | حالة المنصة |
+| `/api/history` | GET | سجل المهام |
+| `/api/tasks` | POST | إنشاء مهمة جديدة |
+| `/api/health` | GET | فحص الصحة |
 
 ---
 

@@ -1,6 +1,6 @@
 [project]
 name = "codeforge"
-version = "0.2.0"
+version = "0.4.0"
 description = "منصة تطوير متعددة الوكلاء - Multi-Agent Development Platform"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["multi-agent", "ai", "development", "automation", "crewai", "openhands"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -23,11 +23,25 @@ dependencies = [
     "crewai>=1.15.0",
     "crewai-tools>=1.15.0",
     "litellm>=1.0.0",
+    "flask>=3.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+codeforge = "src.app:main"
+
+[[tool.setuptools.packages.find]]
+where = ["src"]
+
 [project.urls]
-Homepage = "https://github.com/codeforge/codeforge"
-Documentation = "https://github.com/codeforge/codeforge/docs"
+Homepage = "https://github.com/angaaamy-cpu/codeforge"
+Documentation = "https://github.com/angaaamy-cpu/codeforge/docs"
 Repository = "https://github.com/codeforge/codeforge"
 Issues = "https://github.com/codeforge/codeforge/issues"
 
