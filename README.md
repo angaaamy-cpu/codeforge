@@ -146,10 +146,46 @@ python src/agents.py "وصف المهمة"
 
 | المسار | الطريقة | الوصف |
 |--------|--------|-------|
-| `/api/state` | GET | حالة المنصة |
-| `/api/history` | GET | سجل المهام |
-| `/api/tasks` | POST | إنشاء مهمة جديدة |
 | `/api/health` | GET | فحص الصحة |
+| `/api/state` | GET | حالة المنصة |
+| `/api/projects` | GET/POST | إدارة المشاريع |
+| `/api/projects/<name>/activate` | POST | تفعيل مشروع |
+| `/api/projects/<name>/archive` | POST | أرشفة مشروع |
+| `/api/projects/<name>` | DELETE | حذف مشروع |
+| `/api/tasks` | GET/POST | المهام |
+| `/api/events` | GET | سجل الأحداث |
+| `/api/search` | GET | بحث في الذاكرة |
+| `/api/adrs` | GET | قائمة ADRs |
+
+---
+
+## 🏗️ الهيكل (Phase 5)
+
+```
+codeforge/
+├── config/           # إعدادات مركزية
+│   ├── paths.py      # المسارات
+│   ├── models.py    # النماذج
+│   └── settings.py  # الإعدادات
+├── src/             # الكود المصدري
+│   ├── state.py      # الحالة
+│   ├── memory.py     # الذاكرة
+│   ├── pipeline.py   # دورة العمل
+│   ├── project_manager.py # المشاريع
+│   ├── health.py    # فحص الصحة
+│   ├── event_logger.py  # سجل الأحداث
+│   ├── storage/     # طبقة التخزين
+│   └── app.py       # Flask API
+├── projects/        # المشاريع
+│   ├── todo_app/    # مثال
+│   └── archive/     # مؤرشف
+├── docs/
+│   ├── projects/    # وثائق المشاريع
+│   ├── adr/        # القرارات المعمارية
+│   └── reports/    # تقارير المهام
+├── logs/            # السجلات
+│   └── events.log   # سجل الأحداث
+└── workspace/       # العمل المؤقت
 
 ---
 

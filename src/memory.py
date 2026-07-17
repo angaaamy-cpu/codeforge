@@ -1,7 +1,7 @@
 """
-CodeForge Smart Memory System - Phase 3
+CodeForge Smart Memory System - Phase 5
 ======================================
-نظام الذاكرة الذكي
+نظام الذاكرة الذكي مع بحث محسّن
 """
 
 import os
@@ -10,7 +10,10 @@ from datetime import datetime
 from typing import List, Optional, Dict
 from pathlib import Path
 
+from config import DOCS_DIR, WORKSPACE_DIR, PROJECTS_DIR
 from src.state import get_task_id, record_agent_decision
+from src.storage import docs_storage
+from src.project_manager import get_active_project
 
 
 class SmartMemory:
@@ -27,17 +30,35 @@ class SmartMemory:
         "test": ["tests/*.py", "src/*.py"],
         "architecture": ["docs/architecture.md", "docs/adr/*.md"],
         "landing": ["workspace/index.html", "docs/progress.md"],
+        "project": ["docs/projects/*.md", "projects/*/"],
     }
 
-    def __init__(self, docs_dir: str = "docs", workspace_dir: str = "workspace"):
-        self.docs_dir = Path(docs_dir)
-        self.workspace_dir = Path(workspace_dir)
+    def __init__(self, docs_dir: str = None, workspace_dir: str = None):
+        self.docs_dir = Path(docs_dir) if docs_dir else Path(DOCS_DIR)
+        self.workspace_dir = Path(workspace_dir) if workspace_dir else Path(WORKSPACE_DIR)
+        self.projects_dir = Path(PROJECTS_DIR)
         self.adr_dir = self.docs_dir / "adr"
+
+    def _get_active_project_context(self) -> List[str]:
+        """الحصول على ملفات السياق للمشروع النشط"""
+        active_project = get_active_project()
+        if not active_project:
+            return []
+        
+        project_files = [
+            f"docs/projects/{active_project}.md",
+            f"projects/{active_project}/",
+        ]
+        return [f for f in project_files if os.path.exists(f.split("/")[0]) or "*" in f]
 
     def _get_relevant_files(self, task_description: str) -> List[str]:
         """تحديد الملفات المرتبطة بالمهمة فقط"""
         relevant = []
         description_lower = task_description.lower()
+
+        # إضافة سياق المشروع النشط
+        active_context = self._get_active_project_context()
+        relevant.extend(active_context)
 
         # تحديد نوع المهمة
         task_types = []
@@ -57,11 +78,13 @@ class SmartMemory:
             task_types.append("architecture")
         if "docs" in description_lower or "توثيق" in description_lower:
             task_types.append("docs")
+        if "project" in description_lower or "مشروع" in description_lower:
+            task_types.append("project")
 
         # إذا لم نحدد نوع، نقرأ فقط progress.md
         if not task_types:
             relevant.append("docs/progress.md")
-            return relevant
+            return list(set(relevant))
 
         # جمع الملفات
         for task_type in set(task_types):
@@ -69,21 +92,50 @@ class SmartMemory:
                 for pattern in self.TASK_FILE_MAPPING[task_type]:
                     if "/" in pattern:
                         base = pattern.split("/")[0]
-                        full_pattern = self.docs_dir if base == "docs" else self.workspace_dir
-                        if "*" in pattern:
-                            import glob
-                            glob_pattern = str(self.docs_dir / pattern.replace("docs/", "")) if base == "docs" else str(self.workspace_dir / pattern.replace("workspace/", ""))
-                            matches = glob.glob(glob_pattern)
-                            relevant.extend([str(Path(m).relative_to(".")) for m in matches if os.path.exists(m)])
-                        else:
-                            full_path = self.docs_dir / pattern.split("/")[1] if base == "docs" else self.workspace_dir / pattern.split("/")[1]
+                        if base == "docs":
+                            if "*" in pattern:
+                                import glob
+                                glob_pattern = str(self.docs_dir / pattern.replace("docs/", ""))
+                                matches = glob.glob(glob_pattern)
+                                for m in matches:
+                                    rel_path = str(Path(m).relative_to("."))
+                                    if os.path.exists(rel_path):
+                                        relevant.append(rel_path)
+                            else:
+                                full_path = self.docs_dir / pattern.split("/")[1]
+                                if full_path.exists():
+                                    relevant.append(str(full_path))
+                        elif base == "workspace":
+                            if "*" in pattern:
+                                import glob
+                                glob_pattern = str(self.workspace_dir / pattern.replace("workspace/", ""))
+                                matches = glob.glob(glob_pattern)
+                                for m in matches:
+                                    rel_path = str(Path(m).relative_to("."))
+                                    if os.path.exists(rel_path):
+                                        relevant.append(rel_path)
+                            else:
+                                full_path = self.workspace_dir / pattern.split("/")[1]
+                                if full_path.exists():
+                                    relevant.append(str(full_path))
+                        elif base == "src":
+                            full_path = Path("src") / pattern.split("/")[1]
                             if full_path.exists():
-                                relevant.append(str(full_path.relative_to(".")))
+                                relevant.append(str(full_path))
+                        elif base == "projects":
+                            if "*" in pattern:
+                                import glob
+                                glob_pattern = str(self.projects_dir / pattern.replace("projects/", ""))
+                                matches = glob.glob(glob_pattern)
+                                for m in matches:
+                                    rel_path = str(Path(m).relative_to("."))
+                                    if os.path.exists(rel_path):
+                                        relevant.append(rel_path)
 
         # دائماً أضف progress.md
         progress_path = self.docs_dir / "progress.md"
-        if progress_path.exists() and str(progress_path.relative_to(".")) not in relevant:
-            relevant.append(str(progress_path.relative_to(".")))
+        if progress_path.exists() and str(progress_path) not in relevant:
+            relevant.append(str(progress_path))
 
         return list(set(relevant))
 
@@ -102,9 +154,10 @@ class SmartMemory:
 
         for file_path in relevant_files:
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    context[file_path] = f.read()
-            except FileNotFoundError:
+                if os.path.isfile(file_path):
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        context[file_path] = f.read()
+            except (FileNotFoundError, IOError):
                 pass  # تجاهل الملفات غير الموجودة
 
         return context
@@ -139,6 +192,7 @@ class SmartMemory:
             مسار الملف المسجل فيه
         """
         task_id = get_task_id() or "unknown"
+        active_project = get_active_project()
 
         if impact == "architectural":
             # إنشاء ADR جديد
@@ -156,6 +210,7 @@ class SmartMemory:
 
 **الوكيل**: {agent}
 **المهمة**: {task_id}
+**المشروع**: {active_project or 'عام'}
 
 {content}
 
@@ -197,6 +252,7 @@ class SmartMemory:
                 with open(progress_file, "a", encoding="utf-8") as f:
                     f.write(f"\n\n### قرار تشغيلي - {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
                     f.write(f"**الوكيل**: {agent}\n")
+                    f.write(f"**المشروع**: {active_project or 'عام'}\n")
                     f.write(f"**المهمة**: {task_id}\n")
                     f.write(f"**القرار**: {content}\n")
             
@@ -218,6 +274,7 @@ class SmartMemory:
         """
         progress_file = self.docs_dir / "progress.md"
         task_id = get_task_id() or "N/A"
+        active_project = get_active_project()
         
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
         
@@ -230,8 +287,24 @@ class SmartMemory:
 
         entry = f"\n| {task_id} | {task} | {timestamp} | {status_icon} {status} | {notes} |"
         
+        if active_project:
+            entry += f" | {active_project}"
+        
         with open(progress_file, "a", encoding="utf-8") as f:
             f.write(entry)
+
+    def search_memory(self, query: str, limit: int = 10) -> List[Dict]:
+        """
+        بحث نصي في الذاكرة
+        
+        Args:
+            query: نص البحث
+            limit: عدد النتائج
+            
+        Returns:
+            قائمة النتائج
+        """
+        return docs_storage.search(query)
 
 
 # ============================================================
@@ -258,3 +331,8 @@ def record_decision(agent: str, content: str, impact: str) -> str:
 def update_progress(task: str, status: str, notes: str = ""):
     """تحديث التقدم"""
     memory.update_progress(task, status, notes)
+
+
+def search_memory(query: str, limit: int = 10) -> List[Dict]:
+    """بحث في الذاكرة"""
+    return memory.search_memory(query, limit)

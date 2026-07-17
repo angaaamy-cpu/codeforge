@@ -11,43 +11,59 @@
         <!-- Header -->
         <header class="header">
             <h1>🔨 CodeForge</h1>
-            <p class="subtitle">منصة تطوير متعددة الوكلاء</p>
+            <p class="subtitle">لوحة التحكم - Phase 5</p>
         </header>
 
-        <!-- Status Section -->
+        <!-- Status Cards -->
         <section class="status-section">
             <h2>📊 حالة المنصة</h2>
             <div class="status-grid">
-                <div class="status-card">
+                <div class="status-card" id="card-status">
                     <span class="status-label">الحالة</span>
-                    <span class="status-value" id="task-status">جاري التحميل...</span>
+                    <span class="status-value" id="health-status">-</span>
                 </div>
                 <div class="status-card">
-                    <span class="status-label">الوكيل النشط</span>
-                    <span class="status-value" id="active-agent">-</span>
+                    <span class="status-label">المشاريع</span>
+                    <span class="status-value" id="project-count">-</span>
                 </div>
                 <div class="status-card">
-                    <span class="status-label">المهام المنجزة</span>
-                    <span class="status-value" id="completed-tasks">0 / 0</span>
+                    <span class="status-label">المهام</span>
+                    <span class="status-value" id="task-count">-</span>
                 </div>
                 <div class="status-card">
-                    <span class="status-label">المرحلة</span>
-                    <span class="status-value" id="phase">Phase 4</span>
+                    <span class="status-label">ADRs</span>
+                    <span class="status-value" id="adr-count">-</span>
                 </div>
             </div>
         </section>
 
-        <!-- Task Input Section -->
+        <!-- Projects Section -->
+        <section class="projects-section">
+            <h2>📂 المشاريع</h2>
+            <div class="project-actions">
+                <input type="text" id="new-project-name" placeholder="اسم المشروع الجديد">
+                <button onclick="createProject()" class="btn-primary">إنشاء</button>
+            </div>
+            <div id="projects-list" class="projects-list">
+                <p class="loading">جاري التحميل...</p>
+            </div>
+        </section>
+
+        <!-- Active Project -->
+        <section class="active-section" id="active-section" style="display: none;">
+            <h2>🎯 المشروع النشط</h2>
+            <div class="active-project-info">
+                <span id="active-project-name">-</span>
+                <button onclick="switchProject(null)" class="btn-secondary">إلغاء التفعيل</button>
+            </div>
+        </section>
+
+        <!-- New Task -->
         <section class="task-section">
             <h2>📝 مهمة جديدة</h2>
             <form id="task-form">
                 <div class="input-group">
-                    <input 
-                        type="text" 
-                        id="task-input" 
-                        placeholder="اكتب المهمة هنا..."
-                        required
-                    >
+                    <input type="text" id="task-input" placeholder="اكتب المهمة هنا..." required>
                     <button type="submit" class="btn-primary">
                         <span id="btn-text">تشغيل</span>
                         <span id="btn-loader" class="loader" style="display: none;"></span>
@@ -57,21 +73,265 @@
             <div id="task-result" class="task-result"></div>
         </section>
 
-        <!-- History Section -->
-        <section class="history-section">
-            <h2>📜 سجل التنفيذ</h2>
-            <div id="history-list" class="history-list">
+        <!-- Events Log -->
+        <section class="events-section">
+            <h2>📜 سجل الأحداث</h2>
+            <div id="events-list" class="events-list">
                 <p class="loading">جاري التحميل...</p>
             </div>
         </section>
 
-        <!-- Error Log -->
-        <section class="error-section" id="error-section" style="display: none;">
-            <h2>❌ سجل الأخطاء</h2>
-            <div id="error-log" class="error-log"></div>
+        <!-- Search -->
+        <section class="search-section">
+            <h2>🔍 بحث</h2>
+            <div class="input-group">
+                <input type="text" id="search-input" placeholder="ابحث في الذاكرة...">
+                <button onclick="doSearch()" class="btn-secondary">بحث</button>
+            </div>
+            <div id="search-results" class="search-results"></div>
+        </section>
+
+        <!-- Last Commit -->
+        <section class="commit-section" id="commit-section" style="display: none;">
+            <h2>💾 آخر Commit</h2>
+            <div id="last-commit">-</div>
         </section>
     </div>
 
     <script src="/static/js/app.js"></script>
+    <script>
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHealth();
+            loadProjects();
+            loadActiveProject();
+            loadEvents();
+            loadTaskCount();
+            loadAdrCount();
+        });
+
+        // Task form
+        document.getElementById('task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('task-input');
+            const desc = input.value.trim();
+            if (!desc) return;
+
+            setLoading(true);
+            
+            try {
+                const resp = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({description: desc})
+                });
+                const data = await resp.json();
+                showResult(data);
+                
+                // Refresh
+                loadEvents();
+                loadTaskCount();
+            } catch (err) {
+                showResult({success: false, error: err.message});
+            }
+            
+            setLoading(false);
+        });
+
+        async function loadHealth() {
+            try {
+                const resp = await fetch('/api/health');
+                const data = await resp.json();
+                document.getElementById('health-status').textContent = 
+                    data.status === 'ok' ? '✅ نشط' : '⚠️ تحذير';
+                document.getElementById('project-count').textContent = 
+                    data.projects?.total || 0;
+                
+                if (data.last_commit) {
+                    document.getElementById('last-commit').textContent = data.last_commit;
+                    document.getElementById('commit-section').style.display = 'block';
+                }
+            } catch (e) {
+                document.getElementById('health-status').textContent = '❌ خطأ';
+            }
+        }
+
+        async function loadProjects() {
+            try {
+                const resp = await fetch('/api/projects');
+                const data = await resp.json();
+                const list = document.getElementById('projects-list');
+                
+                if (!data.projects || data.projects.length === 0) {
+                    list.innerHTML = '<p class="empty">لا توجد مشاريع</p>';
+                    return;
+                }
+                
+                list.innerHTML = data.projects.map(p => `
+                    <div class="project-item ${p.is_active ? 'active' : ''}">
+                        <div class="project-info">
+                            <strong>${p.name}</strong>
+                            <span class="status-badge ${p.status}">${p.status}</span>
+                        </div>
+                        <div class="project-actions">
+                            ${!p.is_active ? `<button onclick="activateProject('${p.name}')">تفعيل</button>` : ''}
+                            ${p.status === 'active' ? `<button onclick="archiveProject('${p.name}')">أرشفة</button>` : ''}
+                            <button onclick="deleteProject('${p.name}')" class="btn-danger">حذف</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('projects-list').innerHTML = '<p class="error">خطأ في التحميل</p>';
+            }
+        }
+
+        async function loadActiveProject() {
+            try {
+                const resp = await fetch('/api/active-project');
+                const data = await resp.json();
+                const section = document.getElementById('active-section');
+                const nameEl = document.getElementById('active-project-name');
+                
+                if (data.active_project) {
+                    section.style.display = 'block';
+                    nameEl.textContent = data.active_project;
+                } else {
+                    section.style.display = 'none';
+                }
+            } catch (e) {}
+        }
+
+        async function loadEvents() {
+            try {
+                const resp = await fetch('/api/events?limit=10');
+                const data = await resp.json();
+                const list = document.getElementById('events-list');
+                
+                if (!data.events || data.events.length === 0) {
+                    list.innerHTML = '<p class="empty">لا توجد أحداث</p>';
+                    return;
+                }
+                
+                list.innerHTML = data.events.map(e => `
+                    <div class="event-item">
+                        <span class="event-time">${e.timestamp}</span>
+                        <span class="event-agent">${e.agent}</span>
+                        <span class="event-action">${e.action}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('events-list').innerHTML = '<p class="error">خطأ</p>';
+            }
+        }
+
+        async function loadTaskCount() {
+            try {
+                const resp = await fetch('/api/tasks');
+                const data = await resp.json();
+                document.getElementById('task-count').textContent = 
+                    `${data.completed || 0}/${data.count || 0}`;
+            } catch (e) {}
+        }
+
+        async function loadAdrCount() {
+            try {
+                const resp = await fetch('/api/adrs');
+                const data = await resp.json();
+                document.getElementById('adr-count').textContent = data.count || 0;
+            } catch (e) {}
+        }
+
+        async function createProject() {
+            const name = document.getElementById('new-project-name').value.trim();
+            if (!name) return;
+            
+            try {
+                const resp = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, description: ''})
+                });
+                const data = await resp.json();
+                
+                if (data.success) {
+                    document.getElementById('new-project-name').value = '';
+                    loadProjects();
+                    loadHealth();
+                } else {
+                    alert(data.error || 'فشل');
+                }
+            } catch (e) {
+                alert('خطأ');
+            }
+        }
+
+        async function activateProject(name) {
+            try {
+                await fetch(`/api/projects/${name}/activate`, {method: 'POST'});
+                loadProjects();
+                loadActiveProject();
+            } catch (e) {}
+        }
+
+        async function archiveProject(name) {
+            try {
+                await fetch(`/api/projects/${name}/archive`, {method: 'POST'});
+                loadProjects();
+                loadHealth();
+            } catch (e) {}
+        }
+
+        async function deleteProject(name) {
+            if (!confirm(`حذف المشروع "${name}"؟`)) return;
+            try {
+                await fetch(`/api/projects/${name}`, {method: 'DELETE'});
+                loadProjects();
+                loadHealth();
+            } catch (e) {}
+        }
+
+        async function doSearch() {
+            const q = document.getElementById('search-input').value.trim();
+            if (!q) return;
+            
+            try {
+                const resp = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+                const data = await resp.json();
+                const el = document.getElementById('search-results');
+                
+                if (!data.results || data.results.length === 0) {
+                    el.innerHTML = '<p class="empty">لا نتائج</p>';
+                    return;
+                }
+                
+                el.innerHTML = data.results.map(r => `
+                    <div class="search-result">
+                        <span class="result-type">${r.type}</span>
+                        <strong>${r.id}</strong>
+                        <p>${r.content?.substring(0, 100)}...</p>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function setLoading(loading) {
+            document.getElementById('task-input').disabled = loading;
+            document.getElementById('btn-text').style.display = loading ? 'none' : 'inline';
+            document.getElementById('btn-loader').style.display = loading ? 'inline-block' : 'none';
+        }
+
+        function showResult(data) {
+            const el = document.getElementById('task-result');
+            el.className = 'task-result ' + (data.success ? 'success' : 'error');
+            el.innerHTML = data.success 
+                ? `<strong>✅ ${data.message}</strong><br>الملفات: ${(data.files || []).slice(0, 3).join(', ')}`
+                : `<strong>❌ فشل!</strong><br>${data.error || data.message}`;
+            el.style.display = 'block';
+            
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 5000);
+        }
+    </script>
 </body>
 </html>
