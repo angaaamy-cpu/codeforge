@@ -2,7 +2,6 @@
 name = "codeforge"
 version = "1.0.0"
 description = "منصة بناء المشاريع بالذكاء الاصطناعي - AI-Powered Project Building Platform"
-readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
