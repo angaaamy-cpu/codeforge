@@ -1,8 +1,11 @@
 """
-CodeForge Path Service - Agent OS
-=================================
+CodeForge Path Service - Production Ready
+=========================================
 طبقة مركزية لإدارة المسارات
 جميع عمليات المسارات تمر عبر هذه الطبقة
+
+Environment Variables:
+- WORKSPACE_ROOT: المسار الجذر (افتراضي: كشف تلقائي)
 """
 
 import os
@@ -10,6 +13,26 @@ import shutil
 from pathlib import Path
 from typing import Optional, List, Union
 from dataclasses import dataclass
+
+
+# Global path configuration
+def _get_workspace_root() -> Path:
+    """كشف المسار الجذر من متغيرات البيئة أو الموقع"""
+    # 1. Check WORKSPACE_ROOT environment variable
+    if os.environ.get("WORKSPACE_ROOT"):
+        return Path(os.environ["WORKSPACE_ROOT"]).resolve()
+    
+    # 2. Check if running on Railway
+    if os.environ.get("RAILWAY_ENVIRONMENT"):
+        return Path("/app")
+    
+    # 3. Use the project root (parent of src/)
+    # This works because path_service.py is in src/
+    return Path(__file__).parent.parent.resolve()
+
+
+# Global root path
+WORKSPACE_ROOT = _get_workspace_root()
 
 
 @dataclass
@@ -43,23 +66,31 @@ class PathService:
         path_service.mkdir("projects/new-project")
     """
     
+    _instance = None
+    
+    def __new__(cls, root: str = None):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+    
     def __init__(self, root: str = None):
-        """
-        Args:
-            root: المسار الجذر. إذا لم يُعطَ، يستخدم cwd
-        """
-        # Use provided root or detect from app location
+        if self._initialized:
+            return
+        
+        # Use provided root, WORKSPACE_ROOT, or detect automatically
         if root:
             self.root = Path(root).resolve()
         else:
-            # Use the project root (parent of src/)
-            self.root = Path(__file__).parent.parent.resolve()
+            self.root = WORKSPACE_ROOT
         
         # Ensure root exists
         self.root.mkdir(parents=True, exist_ok=True)
         
         # Initialize directories
         self._init_directories()
+        
+        self._initialized = True
     
     def _init_directories(self) -> None:
         """تهيئة المجلدات المطلوبة"""

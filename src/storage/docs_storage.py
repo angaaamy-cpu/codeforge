@@ -1,7 +1,8 @@
 """
-CodeForge Docs Storage - Phase 5
-================================
+CodeForge Docs Storage - Production Ready
+=========================================
 تخزين يعتمد على ملفات Markdown
+Uses PathService for centralized path management
 """
 
 import os
@@ -12,14 +13,16 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from src.storage.storage import BaseStorage, Project, ADR, TaskReport
+from src.path_service import path_service
 
 
 class DocsStorage(BaseStorage):
     """تخزين يستخدم ملفات Markdown"""
 
-    def __init__(self, docs_dir: str = "docs", projects_dir: str = "projects"):
-        self.docs_dir = Path(docs_dir)
-        self.projects_dir = Path(projects_dir)
+    def __init__(self, docs_dir: str = None, projects_dir: str = None):
+        # Use PathService for centralized paths
+        self.docs_dir = path_service.docs_dir if docs_dir is None else Path(docs_dir)
+        self.projects_dir = path_service.projects_dir if projects_dir is None else Path(projects_dir)
         self.adr_dir = self.docs_dir / "adr"
         self.reports_dir = self.docs_dir / "reports"
         self.projects_docs_dir = self.docs_dir / "projects"

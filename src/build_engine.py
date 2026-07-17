@@ -1,7 +1,9 @@
 """
-CodeForge Build Engine - Phase 8
-=================================
+CodeForge Build Engine - Production Ready
+==========================================
 محرك البناء - ينسق كل المكونات
+Uses PathService for centralized path management
+Uses MockProvider for content generation
 """
 
 import time
@@ -14,7 +16,29 @@ from src.project_manager import project_manager
 from src.pipeline import pipeline, execute_task
 from src.logger import logger
 from src.memory import record_decision
-from config import PROJECTS_DIR
+from src.path_service import path_service
+from src.model_provider import provider_registry
+
+# Get PROJECTS_DIR from PathService
+PROJECTS_DIR = path_service.projects_dir
+
+
+def generate_with_mock(prompt: str) -> str:
+    """
+    توليد محتوى باستخدام Mock Provider
+    إذا فشل، يرجع محتوى افتراضي
+    """
+    result = provider_registry.generate(prompt)
+    if result:
+        return result
+    
+    # محتوى افتراضي
+    if "readme" in prompt.lower():
+        return "# Project\n\n## Description\n\nA project built with CodeForge."
+    elif "html" in prompt.lower():
+        return "<!DOCTYPE html>\n<html>\n<head><title>Project</title></head>\n<body><h1>Welcome</h1></body>\n</html>"
+    else:
+        return "# Generated Content\n\nBuilt with CodeForge."
 
 
 class BuildEngine:

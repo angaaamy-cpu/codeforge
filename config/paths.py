@@ -1,26 +1,30 @@
 """
-CodeForge Paths Configuration - Phase 5
-======================================
+CodeForge Paths Configuration - Production Ready
+==============================================
 جميع مسارات المشروع في مكان واحد
+Uses PathService for centralized path management
 """
 
 import os
 from pathlib import Path
 
-# Root directory
-ROOT_DIR = Path(__file__).parent.parent.absolute()
+# Import from PathService to ensure consistency
+from src.path_service import WORKSPACE_ROOT, path_service
 
-# Core directories
-SRC_DIR = ROOT_DIR / "src"
-DOCS_DIR = ROOT_DIR / "docs"
-AGENTS_DIR = ROOT_DIR / "agents"
-MEMORY_DIR = ROOT_DIR / "memory"
-TESTS_DIR = ROOT_DIR / "tests"
-WORKSPACE_DIR = ROOT_DIR / "workspace"
-PROJECTS_DIR = ROOT_DIR / "projects"
-CONFIG_DIR = ROOT_DIR / "config"
-STATIC_DIR = ROOT_DIR / "static"
-TEMPLATES_DIR = ROOT_DIR / "templates"
+# Root directory (from PathService)
+ROOT_DIR = WORKSPACE_ROOT
+
+# Core directories (use PathService properties)
+SRC_DIR = path_service.root / "src"
+DOCS_DIR = path_service.docs_dir
+AGENTS_DIR = path_service.root / "agents"
+MEMORY_DIR = path_service.root / "memory"
+TESTS_DIR = path_service.root / "tests"
+WORKSPACE_DIR = path_service.root / "workspace"
+PROJECTS_DIR = path_service.projects_dir
+CONFIG_DIR = path_service.root / "config"
+STATIC_DIR = path_service.root / "static"
+TEMPLATES_DIR = path_service.root / "templates"
 
 # Sub-directories
 DOCS_ADR_DIR = DOCS_DIR / "adr"
@@ -29,11 +33,11 @@ DOCS_PROJECTS_DIR = DOCS_DIR / "projects"
 PROJECTS_ARCHIVE_DIR = PROJECTS_DIR / "archive"
 
 # Files
-STATE_FILE = ROOT_DIR / ".codeforge_state.json"
-EVENTS_LOG = ROOT_DIR / "logs" / "events.log"
+STATE_FILE = path_service.root / ".codeforge_state.json"
+EVENTS_LOG = path_service.logs_dir / "events.log"
 PROGRESS_FILE = DOCS_DIR / "progress.md"
-README_FILE = ROOT_DIR / "README.md"
-PYPROJECT_FILE = ROOT_DIR / "pyproject.toml"
+README_FILE = path_service.root / "README.md"
+PYPROJECT_FILE = path_service.root / "pyproject.toml"
 
 # Flask files
 APP_FILE = SRC_DIR / "app.py"

@@ -1,7 +1,8 @@
 """
-CodeForge Pipeline - Phase 3
-==============================
+CodeForge Pipeline - Production Ready
+====================================
 دورة العمل الكاملة: Task → Planner → Executor → Reviewer → Recorder
+Uses PathService for centralized path management
 """
 
 import os
@@ -24,6 +25,7 @@ from src.state import (
 )
 from src.memory import read_context, record_decision, update_progress
 from src.git_manager import auto_commit, has_uncommitted_changes, get_changed_files
+from src.path_service import path_service
 
 
 @dataclass
@@ -443,8 +445,9 @@ class Pipeline:
 
     def _create_report(self):
         """إنشاء تقرير المهمة"""
-        reports_dir = Path("docs/reports")
-        reports_dir.mkdir(exist_ok=True)
+        # Use PathService for centralized paths
+        reports_dir = path_service.docs_dir / "reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
 
         self.report.end_time = datetime.now()
         self.report.duration_seconds = (
@@ -477,6 +480,23 @@ pipeline = Pipeline()
 # ============================================================
 # Helper Functions
 # ============================================================
+
+def generate_content(prompt: str) -> tuple:
+    """
+    توليد محتوى باستخدام Model Provider
+    
+    Returns:
+        (content, error_message)
+        - If successful: (content, None)
+        - If no provider: (None, error_message)
+    """
+    from src.model_provider import provider_registry
+    
+    result = provider_registry.generate(prompt)
+    if result is None:
+        return None, "لا يوجد مزود LLM مهيأ. أضف مفتاح API للمزود المرغوب (Gemini أو OpenAI)."
+    return result, None
+
 
 def execute_task(description: str) -> TaskReport:
     """تنفيذ مهمة"""
