@@ -1,10 +1,10 @@
 """
-CodeForge Workspace Manager - Phase X
+CodeForge Workspace Manager - Agent OS
 ======================================
 إدارة المشاريع والملفات
+Uses PathService for all path operations
 """
 
-import os
 import shutil
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
@@ -13,7 +13,7 @@ from pathlib import Path
 import json
 
 from src.Core.event_bus import EventType, emit
-from src.Core.memory import ProjectMemory
+from src.path_service import path_service
 
 
 @dataclass
@@ -44,21 +44,23 @@ class WorkspaceMetadata:
 class WorkspaceManager:
     """
     مدير مساحة العمل
+    Uses PathService for all path operations
     """
     _instance: Optional["WorkspaceManager"] = None
     
-    def __new__(cls, root_path: str = None) -> "WorkspaceManager":
+    def __new__(cls) -> "WorkspaceManager":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._initialized = False
         return cls._instance
     
-    def __init__(self, root_path: str = None):
+    def __init__(self):
         if self._initialized:
             return
         
-        # Root directory for all workspaces
-        self.root_path = Path(root_path) if root_path else Path("workspaces")
+        # Use PathService
+        self.path_service = path_service
+        self.root_path = path_service.workspaces_dir
         self.root_path.mkdir(parents=True, exist_ok=True)
         
         # Index file
@@ -74,12 +76,16 @@ class WorkspaceManager:
     def _load_index(self) -> None:
         """تحميل فهرس المشاريع"""
         if self.index_file.exists():
-            with open(self.index_file, "r") as f:
-                data = json.load(f)
-                for name, info in data.items():
-                    info["created_at"] = datetime.fromisoformat(info["created_at"])
-                    info["updated_at"] = datetime.fromisoformat(info["updated_at"])
-                    self._index[name] = WorkspaceMetadata(**info)
+            try:
+                with open(self.index_file, "r") as f:
+                    data = json.load(f)
+                    for name, info in data.items():
+                        info["created_at"] = datetime.fromisoformat(info["created_at"])
+                        info["updated_at"] = datetime.fromisoformat(info["updated_at"])
+                        self._index[name] = WorkspaceMetadata(**info)
+            except (json.JSONDecodeError, ValueError):
+                # Corrupted index, start fresh
+                self._index = {}
     
     def _save_index(self) -> None:
         """حفظ فهرس المشاريع"""
@@ -107,15 +113,12 @@ class WorkspaceManager:
         if name in self._index:
             raise ValueError(f"Workspace '{name}' already exists")
         
-        # Create directory structure
+        # Create directory structure using PathService
         workspace_path = self.root_path / name
-        workspace_path.mkdir(parents=True, exist_ok=True)
-        
-        # Create subdirectories
-        (workspace_path / "src").mkdir(exist_ok=True)
-        (workspace_path / "tests").mkdir(exist_ok=True)
-        (workspace_path / "docs").mkdir(exist_ok=True)
-        (workspace_path / "memory").mkdir(exist_ok=True)
+        self.path_service.mkdir(str(workspace_path / "src"))
+        self.path_service.mkdir(str(workspace_path / "tests"))
+        self.path_service.mkdir(str(workspace_path / "docs"))
+        self.path_service.mkdir(str(workspace_path / "memory"))
         
         # Create metadata
         metadata = WorkspaceMetadata(
@@ -173,12 +176,12 @@ class WorkspaceManager:
         metadata.status = "archived"
         metadata.updated_at = datetime.now()
         
-        # Move to archive
+        # Move to archive using PathService
         archive_path = self.root_path / "archive" / name
         workspace_path = Path(metadata.path)
         
         if workspace_path.exists():
-            shutil.move(str(workspace_path), str(archive_path))
+            self.path_service.move(str(workspace_path), str(archive_path))
             metadata.path = str(archive_path)
         
         self._save_index()
@@ -193,10 +196,8 @@ class WorkspaceManager:
         
         metadata = self._index[name]
         
-        # Delete files
-        workspace_path = Path(metadata.path)
-        if workspace_path.exists():
-            shutil.rmtree(workspace_path)
+        # Delete files using PathService
+        self.path_service.delete(metadata.path)
         
         # Remove from index
         del self._index[name]

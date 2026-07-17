@@ -125,8 +125,18 @@ class EventBus:
         # For now, return False - can be enhanced later
         return False
     
-    def emit(self, event: Event) -> None:
-        """إصدار حدث"""
+    def emit(self, event_type: EventType, data: Dict = None) -> Event:
+        """إصدار حدث
+        
+        Args:
+            event_type: نوع الحدث
+            data: بيانات الحدث
+            
+        Returns:
+            Event
+        """
+        event = Event(type=event_type, data=data or {})
+        
         # Store in history
         self._history.append(event)
         if len(self._history) > self._max_history:
@@ -139,6 +149,8 @@ class EventBus:
                 handler(event)
             except Exception as e:
                 print(f"Event handler error: {e}")
+        
+        return event
     
     def get_history(self, event_type: Optional[EventType] = None, limit: int = 100) -> List[Event]:
         """الحصول على سجل الأحداث"""
@@ -165,7 +177,7 @@ event_bus = EventBus()
 def emit(event_type: EventType, data: Dict[str, Any] = None, source: str = "") -> Event:
     """إصدار حدث بسرعة"""
     event = Event(type=event_type, data=data or {}, source=source)
-    event_bus.emit(event)
+    event_bus.emit(event.type, event.data)
     return event
 
 

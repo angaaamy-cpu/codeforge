@@ -43,6 +43,15 @@ class SecretMetadata:
     created_at: datetime = field(default_factory=datetime.now)
     last_used: Optional[datetime] = None
     
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "metadata": self.metadata,
+            "created_at": self.created_at.isoformat(),
+            "last_used": self.last_used.isoformat() if self.last_used else None,
+        }
+    
     @classmethod
     def from_secret(cls, secret: Secret) -> "SecretMetadata":
         return cls(

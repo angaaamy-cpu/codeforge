@@ -62,8 +62,18 @@ def api_health():
         return jsonify({"error": "النظام غير جاهز"}), 500
     
     try:
-        health = check_health()
-        return jsonify(health)
+        from src.diagnostics import run_diagnostics
+        return jsonify(run_diagnostics())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/diagnostics", methods=["GET"])
+def api_diagnostics():
+    """System Diagnostics"""
+    try:
+        from src.diagnostics import run_diagnostics
+        return jsonify(run_diagnostics())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
