@@ -124,3 +124,5 @@ python src/app.py
 | ADR-006 | 2026-07-17 | ✅ |
 
 ### الإصدار: CodeForge v1.0.0
+
+| EasyTrade | منصة EasyTrade للتجارة الإلكترونية | 2026-07-17 03:20 | ✅ completed | مشروع إنتاجي كامل |
