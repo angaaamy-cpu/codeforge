@@ -44,15 +44,16 @@ CodeForge هي منصة تطوير برمجيات متقدمة تستخدم ال
 
 ## مراحل التطوير
 
-### المرحلة 1: الأساس ✅ (الحالية)
+### المرحلة 1: الأساس ✅
 - [x] هيكل المشروع
 - [x] التوثيق الأولي
 - [x] تعريف الأدوار
 
-### المرحلة 2: الوكلاء + CrewAI 📋
-- [ ] دمج CrewAI
-- [ ] بناء 4 وكلاء
-- [ ] ربط Gemini API
+### المرحلة 2: الوكلاء + CrewAI ✅ (الحالية)
+- [x] دمج CrewAI
+- [x] بناء 4 وكلاء
+- [x] ربط Gemini API
+- [x] صفحة هبوط CodeForge AI
 
 ### المرحلة 3: دورة العمل + الذاكرة 📋
 - [ ] دورة عمل كاملة
@@ -77,7 +78,10 @@ codeforge/
 │   ├── progress.md    # سجل التقدم
 │   ├── coding_rules.md # قواعد الترميز
 │   ├── project_conventions.md # اتفاقيات
+│   ├── qa_report.md   # تقرير الاختبار
 │   └── adr/          # Architecture Decisions
+│       ├── 001-initial-architecture.md
+│       └── 002-first-agents.md
 ├── agents/            # تعريف الوكلاء
 │   ├── manager/       # Manager Agent
 │   ├── architect/     # Architect Agent
@@ -85,8 +89,10 @@ codeforge/
 │   └── qa/           # QA Agent
 ├── memory/            # طبقة الذاكرة
 ├── src/               # الكود المصدري
+│   └── agents.py     # فريق الوكلاء
 ├── tests/             # الاختبارات
 └── workspace/         # مساحة العمل
+    └── index.html    # صفحة الهبوط
 ```
 
 ---
@@ -96,9 +102,11 @@ codeforge/
 - Python 3.11+
 - Git
 
-### للمرحلة 2+
-- CrewAI
-- Gemini API Key
+### للمرحلة 2+ (مُثبت)
+- CrewAI >= 1.15
+- CrewAI Tools >= 1.15
+- litellm >= 1.0
+- Gemini API Key (GEMINI_API_KEY)
 
 ### للمرحلة 3+
 - OpenHands
