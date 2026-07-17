@@ -1,16 +1,16 @@
 [project]
 name = "codeforge"
-version = "0.4.0"
-description = "منصة تطوير متعددة الوكلاء - Multi-Agent Development Platform"
+version = "1.0.0"
+description = "منصة بناء المشاريع بالذكاء الاصطناعي - AI-Powered Project Building Platform"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "CodeForge Team", email = "team@codeforge.dev"}
 ]
-keywords = ["multi-agent", "ai", "development", "automation", "crewai", "openhands"]
+keywords = ["multi-agent", "ai", "development", "automation", "crewai", "openhands", "flask"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -20,10 +20,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "crewai>=1.15.0",
-    "crewai-tools>=1.15.0",
-    "litellm>=1.0.0",
     "flask>=3.0.0",
+    "gunicorn>=21.0.0",
 ]
 
 [project.optional-dependencies]
@@ -31,6 +29,11 @@ dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
+]
+full = [
+    "crewai>=1.15.0",
+    "crewai-tools>=1.15.0",
+    "litellm>=1.0.0",
 ]
 
 [project.scripts]

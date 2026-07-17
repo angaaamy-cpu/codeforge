@@ -146,8 +146,109 @@ ProjectManager + Pipeline + Logger + Memory
 |---------|--------|
 | Phase 1-7: Platform Core | ✅ مكتمل |
 | Phase 8: v1.0 Product | ✅ مكتمل |
+| Phase 8.1: Deployment Ready | ✅ مكتمل |
 | Phase 9: Backend API | 📋 مخطط |
 | Phase 10: Database | 📋 مخطط |
+
+---
+
+## 🚀 النشر (Deployment)
+
+### Render (موصى به)
+
+1. أنشئ حساب على [Render](https://render.com)
+2. اضغط "New" → "Web Service"
+3. اربط repository من GitHub
+4. اضبط الإعدادات:
+   - **Build Command**: `pip install -e .`
+   - **Start Command**: `gunicorn src.app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4`
+5. اضبط متغيرات البيئة:
+   - `PORT`: 10000
+   - `FLASK_ENV`: production
+6. اضغط "Create Web Service"
+
+أو استخدم `render.yaml` للنشر التلقائي:
+
+```bash
+# Spread the word!
+```
+
+### Railway
+
+1. أنشئ حساب على [Railway](https://railway.app)
+2. اضغط "New Project" → "Deploy from GitHub"
+3. اختر repository
+4. Railway سيقرأ `railway.json` تلقائياً
+5. اضبط متغيرات البيئة في لوحة التحكم
+
+### Docker
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY pyproject.toml .
+RUN pip install -e .
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["gunicorn", "src.app:app", "--bind", "0.0.0.0:8000", "--workers", "2"]
+```
+
+### Heroku
+
+```bash
+heroku create your-codeforge-app
+heroku push main
+heroku open
+```
+
+---
+
+## 📋 متغيرات البيئة
+
+| المتغير | الوصف | القيمة الافتراضية |
+|---------|-------|-----------------|
+| `PORT` | منفذ الخادم | 8000 |
+| `HOST` | عنوان الخادم | 0.0.0.0 |
+| `FLASK_ENV` | بيئة Flask | production |
+| `FLASK_DEBUG` | وضع التصحيح | false |
+| `SECRET_KEY` | مفتاح سري | generated |
+| `LOG_LEVEL` | مستوى السجلات | INFO |
+
+---
+
+## 🔧 التشغيل المحلي
+
+```bash
+# Clone
+git clone https://github.com/angaaamy-cpu/codeforge.git
+cd codeforge
+
+# Install
+pip install -e .
+
+# Run
+python src/app.py
+
+# Or with gunicorn
+gunicorn src.app:app --bind 0.0.0.0:8000 --workers 2
+```
+
+---
+
+## 📁 ملفات النشر
+
+| الملف | الوصف |
+|-------|-------|
+| `render.yaml` | إعدادات Render |
+| `Procfile` | إعدادات Heroku/Dokku |
+| `railway.json` | إعدادات Railway |
+| `.env.example` | مثال متغيرات البيئة |
+| `pyproject.toml` | التبعيات |
 
 ---
 

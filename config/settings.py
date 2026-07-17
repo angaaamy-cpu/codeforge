@@ -23,11 +23,11 @@ from config.models import DEFAULT_MODEL, get_model, get_model_name
 # ============================================================
 
 APP_NAME = "CodeForge"
-APP_VERSION = "0.5.0"
-APP_DESCRIPTION = "منصة تطوير متعددة الوكلاء"
+APP_VERSION = "1.0.0"
+APP_DESCRIPTION = "منصة بناء المشاريع بالذكاء الاصطناعي"
 
 # Phase
-CURRENT_PHASE = "phase5"
+CURRENT_PHASE = "phase8.1"
 
 # ============================================================
 # Flask Settings

@@ -1,7 +1,7 @@
 """
-CodeForge Web Interface - Phase 5
-==================================
-لوحة التحكم الكاملة
+CodeForge Web Interface - Phase 8.1
+===================================
+لوحة التحكم الكاملة - جاهزة للنشر
 """
 
 import os
@@ -22,6 +22,7 @@ app.config["JSON_AS_ASCII"] = False
 
 try:
     from config import APP_NAME, APP_VERSION, CURRENT_PHASE
+    from config.settings import FLASK_HOST, FLASK_PORT, FLASK_DEBUG
     from src.state import (
         get_state_dict, get_state_summary, state_manager,
         add_history, increment_completed, TaskStatus
@@ -380,11 +381,28 @@ def server_error(e):
 # Entry Point
 # ============================================================
 
+def get_port():
+    """الحصول على PORT من متغيرات البيئة"""
+    return int(os.environ.get("PORT", FLASK_PORT))
+
+def get_host():
+    """الحصول على HOST من متغيرات البيئة"""
+    return os.environ.get("HOST", FLASK_HOST)
+
+def is_production():
+    """هل نحن في بيئة الإنتاج"""
+    return os.environ.get("FLASK_ENV", "production") == "production"
+
 if __name__ == "__main__":
+    port = get_port()
+    host = get_host()
+    debug = not is_production()
+    
     print("=" * 50)
-    print(f"🚀 بدء CodeForge v{APP_VERSION} ({CURRENT_PHASE})")
+    print(f"🚀 بدء CodeForge v{APP_VERSION}")
     print("=" * 50)
-    print("📱 افتح المتصفح على: http://localhost:5000")
+    print(f"📱 افتح المتصفح على: http://localhost:{port}")
+    print(f"🔧 Debug mode: {debug}")
     print("=" * 50)
     
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host=host, port=port, debug=debug)
