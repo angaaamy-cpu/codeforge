@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المهام - TaskFlow Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo">
+                    <span class="logo-icon">📋</span>
+                    <span>TaskFlow Pro</span>
+                </a>
+                
+                <nav class="header-nav">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                    <a href="tasks.html" class="nav-link active">المهام</a>
+                    <a href="team.html" class="nav-link">الفريق</a>
+                    <a href="reports.html" class="nav-link">التقارير</a>
+                    <a href="settings.html" class="nav-link">الإعدادات</a>
+                </nav>
+                
+                <div class="user-menu dropdown">
+                    <span class="user-avatar">👤</span>
+                    <div class="user-info">
+                        <span class="user-name">أحمد محمد</span>
+                        <span class="user-role">مدير</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content page-transition">
+        <div class="container">
+            <div class="flex justify-between items-center mb-4">
+                <h1>المهام</h1>
+                <button class="btn btn-primary" onclick="showCreateTaskModal()">
+                    ➕ إضافة مهمة
+                </button>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="flex gap-2" style="flex-wrap: wrap;">
+                    <input type="text" id="search-input" class="form-input" 
+                           placeholder="البحث في المهام..." style="flex: 1; min-width: 200px;">
+                    
+                    <select id="filter-status" class="form-select filter-select" style="width: auto;">
+                        <option value="all">جميع الحالات</option>
+                    </select>
+                    
+                    <select id="filter-priority" class="form-select filter-select" style="width: auto;">
+                        <option value="all">جميع الأولويات</option>
+                    </select>
+                    
+                    <select id="filter-assignee" class="form-select filter-select" style="width: auto;">
+                        <option value="all">جميع الأعضاء</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Tasks Table -->
+            <div class="card">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>المهمة</th>
+                                <th>الحالة</th>
+                                <th>الأولوية</th>
+                                <th>المسؤول</th>
+                                <th>الموعد</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasks-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">إضافة مهمة جديدة</h3>
+                <button class="modal-close" onclick="hideModal('task-modal')">&times;</button>
+            </div>
+            <form id="task-form" onsubmit="handleTaskSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="task-id">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="task-title">العنوان *</label>
+                        <input type="text" id="task-title" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="task-description">الوصف</label>
+                        <textarea id="task-description" class="form-textarea"></textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="task-status">الحالة</label>
+                            <select id="task-status" class="form-select">
+                                <option value="pending">معلق</option>
+                                <option value="in-progress">قيد التنفيذ</option>
+                                <option value="completed">مكتمل</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="task-priority">الأولوية</label>
+                            <select id="task-priority" class="form-select">
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="task-assignee">المسؤول</label>
+                            <select id="task-assignee" class="form-select"></select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="task-due-date">الموعد</label>
+                            <input type="date" id="task-due-date" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="task-category">الفئة</label>
+                        <select id="task-category" class="form-select">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('task-modal')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/tasks.js"></script>
+</body>
+</html>

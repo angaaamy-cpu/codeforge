@@ -1,0 +1,167 @@
+[
+    {
+        "id": 1,
+        "title": "تصميم واجهة المستخدم الجديدة",
+        "description": "إنشاء تصميم جديد للواجهة الرئيسية مع دعم الوضع الداكن",
+        "status": "completed",
+        "priority": "high",
+        "assignee": "ahmed@company.com",
+        "dueDate": "2026-07-10",
+        "createdAt": "2026-07-01",
+        "category": "design"
+    },
+    {
+        "id": 2,
+        "title": "تطوير API للمستخدمين",
+        "description": "إنشاء نقاط API للتسجيل والدخول وإدارة الملفات الشخصية",
+        "status": "in-progress",
+        "priority": "high",
+        "assignee": "sara@company.com",
+        "dueDate": "2026-07-18",
+        "createdAt": "2026-07-03",
+        "category": "backend"
+    },
+    {
+        "id": 3,
+        "title": "اختبار أداء النظام",
+        "description": "إجراء اختبارات الحمل على الخادم واختبار وقت الاستجابة",
+        "status": "pending",
+        "priority": "medium",
+        "assignee": "omar@company.com",
+        "dueDate": "2026-07-25",
+        "createdAt": "2026-07-05",
+        "category": "qa"
+    },
+    {
+        "id": 4,
+        "title": "تحديث قاعدة البيانات",
+        "description": "إضافة جداول جديدة للإشعارات والتقارير",
+        "status": "in-progress",
+        "priority": "medium",
+        "assignee": "fatima@company.com",
+        "dueDate": "2026-07-20",
+        "createdAt": "2026-07-02",
+        "category": "backend"
+    },
+    {
+        "id": 5,
+        "title": "كتابة توثيق API",
+        "description": "توثيق جميع نقاط API باستخدام Swagger",
+        "status": "pending",
+        "priority": "low",
+        "assignee": "ali@company.com",
+        "dueDate": "2026-07-30",
+        "createdAt": "2026-07-06",
+        "category": "docs"
+    },
+    {
+        "id": 6,
+        "title": "إصلاح مشكلة تسجيل الدخول",
+        "description": "حل مشكلة انتهاء الجلسة أثناء الاستخدام",
+        "status": "completed",
+        "priority": "high",
+        "assignee": "sara@company.com",
+        "dueDate": "2026-07-08",
+        "createdAt": "2026-07-07",
+        "category": "bug"
+    },
+    {
+        "id": 7,
+        "title": "إضافة دعم RTL",
+        "description": "تطبيق دعم اللغات من اليمين لليسار",
+        "status": "completed",
+        "priority": "medium",
+        "assignee": "ahmed@company.com",
+        "dueDate": "2026-07-12",
+        "createdAt": "2026-07-08",
+        "category": "frontend"
+    },
+    {
+        "id": 8,
+        "title": "تحسين سرعة التحميل",
+        "description": "ضغط الصور وتحسين CSS",
+        "status": "in-progress",
+        "priority": "medium",
+        "assignee": "ahmed@company.com",
+        "dueDate": "2026-07-22",
+        "createdAt": "2026-07-09",
+        "category": "frontend"
+    },
+    {
+        "id": 9,
+        "title": "إضافة إشعارات البريد",
+        "description": "إرسال إشعارات عند تعيين مهمة جديدة",
+        "status": "pending",
+        "priority": "low",
+        "assignee": "omar@company.com",
+        "dueDate": "2026-08-01",
+        "createdAt": "2026-07-10",
+        "category": "feature"
+    },
+    {
+        "id": 10,
+        "title": "مراجعة الكود الأمني",
+        "description": "فحص شامل لأي ثغرات أمنية",
+        "status": "pending",
+        "priority": "high",
+        "assignee": "fatima@company.com",
+        "dueDate": "2026-07-28",
+        "createdAt": "2026-07-11",
+        "category": "security"
+    },
+    {
+        "id": 11,
+        "title": "نشر الإصدار 2.0",
+        "description": "نشر التحديثات على الخادم الإنتاجي",
+        "status": "pending",
+        "priority": "critical",
+        "assignee": "ali@company.com",
+        "dueDate": "2026-08-05",
+        "createdAt": "2026-07-12",
+        "category": "deploy"
+    },
+    {
+        "id": 12,
+        "title": "إضافة لوحة معلومات الفريق",
+        "description": "عرض نشاط الفريق والإحصائيات",
+        "status": "in-progress",
+        "priority": "medium",
+        "assignee": "ahmed@company.com",
+        "dueDate": "2026-07-24",
+        "createdAt": "2026-07-13",
+        "category": "feature"
+    },
+    {
+        "id": 13,
+        "title": "إصلاح مشكلة العرض على الهاتف",
+        "description": "حل مشكلة التداخل في القائمة الجانبية",
+        "status": "completed",
+        "priority": "medium",
+        "assignee": "sara@company.com",
+        "dueDate": "2026-07-14",
+        "createdAt": "2026-07-13",
+        "category": "bug"
+    },
+    {
+        "id": 14,
+        "title": "إضافة تصدير PDF",
+        "description": "تصدير التقارير كملفات PDF",
+        "status": "pending",
+        "priority": "low",
+        "assignee": "omar@company.com",
+        "dueDate": "2026-08-10",
+        "createdAt": "2026-07-14",
+        "category": "feature"
+    },
+    {
+        "id": 15,
+        "title": "اختبار التكامل مع Slack",
+        "description": "فحص إرسال الإشعارات لقناة Slack",
+        "status": "pending",
+        "priority": "medium",
+        "assignee": "fatima@company.com",
+        "dueDate": "2026-07-29",
+        "createdAt": "2026-07-15",
+        "category": "integration"
+    }
+]

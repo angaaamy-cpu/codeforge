@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Pro - نظام إدارة المهام</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container" style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh; text-align: center;">
+        <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
+            <span class="logo-icon">📋</span>
+            <span>TaskFlow Pro</span>
+        </div>
+        
+        <h1 style="margin-bottom: 1rem;">مرحباً بك في TaskFlow Pro</h1>
+        <p class="text-muted" style="margin-bottom: 2rem; font-size: 1.1rem;">
+            نظام متكامل لإدارة مهام الفريق والمشاريع
+        </p>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
+            <a href="dashboard.html" class="btn btn-secondary">المتابعة كزائر</a>
+        </div>
+        
+        <div class="mt-4" style="color: var(--text-muted); font-size: 0.9rem;">
+            <p>📧 للتجربة: any@company.com مع أي كلمة مرور</p>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // If already logged in, redirect to dashboard
+        if (isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

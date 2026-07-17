@@ -1,0 +1,52 @@
+[
+    {
+        "id": 1,
+        "name": "أحمد محمد",
+        "email": "ahmed@company.com",
+        "role": "manager",
+        "avatar": "👨‍💼",
+        "status": "online",
+        "department": "إدارة",
+        "joinedAt": "2025-01-15"
+    },
+    {
+        "id": 2,
+        "name": "سارة أحمد",
+        "email": "sara@company.com",
+        "role": "member",
+        "avatar": "👩‍💻",
+        "status": "online",
+        "department": "تطوير",
+        "joinedAt": "2025-03-20"
+    },
+    {
+        "id": 3,
+        "name": "عمر خالد",
+        "email": "omar@company.com",
+        "role": "member",
+        "avatar": "👨‍🔬",
+        "status": "away",
+        "department": "اختبار",
+        "joinedAt": "2025-05-10"
+    },
+    {
+        "id": 4,
+        "name": "فاطمة علي",
+        "email": "fatima@company.com",
+        "role": "member",
+        "avatar": "👩‍🔧",
+        "status": "online",
+        "department": "أمن المعلومات",
+        "joinedAt": "2025-06-01"
+    },
+    {
+        "id": 5,
+        "name": "علي حسن",
+        "email": "ali@company.com",
+        "role": "member",
+        "avatar": "👨‍🚀",
+        "status": "offline",
+        "department": "نشر",
+        "joinedAt": "2025-08-15"
+    }
+]

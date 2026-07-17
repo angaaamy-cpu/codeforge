@@ -1,0 +1,476 @@
+/**
+ * TaskFlow Pro - Dashboard Styles
+ * ==============================
+ * Dashboard-specific components
+ */
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Stat Card */
+.stat-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon.blue {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: var(--info);
+}
+
+.stat-icon.green {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+}
+
+.stat-icon.purple {
+    background-color: rgba(124, 58, 237, 0.2);
+    color: var(--accent-light);
+}
+
+.stat-icon.orange {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: var(--warning);
+}
+
+.stat-trend {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius);
+}
+
+.stat-trend.up {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+}
+
+.stat-trend.down {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: var(--error);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Chart Container */
+.chart-container {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Simple Bar Chart */
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    height: 200px;
+    padding-top: 1rem;
+}
+
+.bar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bar {
+    width: 100%;
+    max-width: 60px;
+    background: linear-gradient(to top, var(--accent), var(--accent-light));
+    border-radius: var(--radius) var(--radius) 0 0;
+    transition: height 0.3s ease;
+}
+
+.bar-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.bar-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Activity Feed */
+.activity-feed {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Task List Widget */
+.task-list-widget {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.task-info {
+    flex: 1;
+}
+
+.task-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.task-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.task-priority {
+    font-size: 1rem;
+}
+
+/* Team Widget */
+.team-widget {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.team-member-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.team-member-card:hover {
+    border-color: var(--accent);
+}
+
+.member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.member-info {
+    flex: 1;
+}
+
+.member-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.member-role {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Progress Ring */
+.progress-ring {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.progress-ring svg {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: var(--bg-hover);
+    stroke-width: 10;
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.progress-ring-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-ring-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.progress-ring-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Two Column Layout */
+.two-column {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .two-column {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Donut Chart */
+.donut-chart {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* Recent Tasks Table Widget */
+.task-table-widget {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.task-table-widget .table {
+    margin: 0;
+}
+
+.task-table-widget .table th:first-child,
+.task-table-widget .table td:first-child {
+    padding-left: 1.5rem;
+}
+
+.task-table-widget .table th:last-child,
+.task-table-widget .table td:last-child {
+    padding-right: 1.5rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.quick-action {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.quick-action:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.quick-action-icon {
+    font-size: 1.25rem;
+}
+
+/* Mini Stats Row */
+.mini-stats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem;
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    margin-top: 1rem;
+}
+
+.mini-stat {
+    text-align: center;
+}
+
+.mini-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-light);
+}
+
+.mini-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

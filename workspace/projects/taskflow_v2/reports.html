@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير - TaskFlow Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo">
+                    <span class="logo-icon">📋</span>
+                    <span>TaskFlow Pro</span>
+                </a>
+                
+                <nav class="header-nav">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                    <a href="tasks.html" class="nav-link">المهام</a>
+                    <a href="team.html" class="nav-link">الفريق</a>
+                    <a href="reports.html" class="nav-link active">التقارير</a>
+                    <a href="settings.html" class="nav-link">الإعدادات</a>
+                </nav>
+                
+                <div class="user-menu">
+                    <span class="user-avatar">👤</span>
+                    <div class="user-info">
+                        <span class="user-name">أحمد محمد</span>
+                        <span class="user-role">مدير</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content page-transition">
+        <div class="container">
+            <div class="flex justify-between items-center mb-4">
+                <h1>التقارير</h1>
+                <button class="btn btn-primary" onclick="exportReport()">
+                    📥 تصدير التقرير
+                </button>
+            </div>
+            
+            <!-- Stats Summary -->
+            <div class="dashboard-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">📋</div>
+                    </div>
+                    <div class="stat-value" id="report-total-tasks">0</div>
+                    <div class="stat-label">إجمالي المهام</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">✅</div>
+                    </div>
+                    <div class="stat-value" id="report-completed">0</div>
+                    <div class="stat-label">مكتمل</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon purple">🔄</div>
+                    </div>
+                    <div class="stat-value" id="report-inprogress">0</div>
+                    <div class="stat-label">قيد التنفيذ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">⏳</div>
+                    </div>
+                    <div class="stat-value" id="report-pending">0</div>
+                    <div class="stat-label">معلق</div>
+                </div>
+            </div>
+            
+            <!-- Detailed Reports -->
+            <div class="two-column">
+                <div>
+                    <!-- Category Breakdown -->
+                    <div class="card mb-4">
+                        <h3 class="card-title mb-3">توزيع المهام حسب الفئة</h3>
+                        <div id="category-chart">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Team Productivity -->
+                    <div class="card">
+                        <h3 class="card-title mb-3">إنتاجية الفريق</h3>
+                        <div id="team-productivity">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <!-- Activity Feed -->
+                    <div class="card">
+                        <h3 class="card-title mb-3">نشاط النظام</h3>
+                        <div class="activity-feed" id="activity-feed" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+</html>
