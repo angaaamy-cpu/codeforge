@@ -1,6 +1,6 @@
 """
-CodeForge Agent Team - Phase 2
-===============================
+CodeForge Agent Team - Phase 2 & 3
+==================================
 فريق الوكلاء الأربعة: Manager, Architect, Developer, QA
 """
 
@@ -11,6 +11,18 @@ from crewai import Agent, Task, Crew, Process
 from crewai_tools import FileReadTool, FileWriteTool
 
 # ============================================================
+# استيراد Phase 3 Modules
+# ============================================================
+
+try:
+    from src.state import get_state, record_agent_decision, get_task_id
+    from src.memory import record_decision as memory_record_decision, update_progress
+    from src.git_manager import auto_commit, auto_push, has_uncommitted_changes
+    PHASE3_ENABLED = True
+except ImportError:
+    PHASE3_ENABLED = False
+
+# ============================================================
 # الأدوات (Tools)
 # ============================================================
 
@@ -19,6 +31,45 @@ progress_writer = FileWriteTool(file_path="docs/progress.md")
 adr_writer = FileWriteTool(file_path="docs/adr/")
 html_writer = FileWriteTool(file_path="workspace/index.html")
 qa_writer = FileWriteTool(file_path="docs/qa_report.md")
+
+
+def record_agent_decision_safe(agent: str, content: str, impact: str):
+    """تسجيل قرار بطريقة آمنة (مع fallback)"""
+    if PHASE3_ENABLED:
+        try:
+            memory_record_decision(agent, content, impact)
+        except Exception:
+            pass  # Phase 3 غير مهيأ
+
+
+def update_progress_safe(task: str, status: str, notes: str = ""):
+    """تحديث التقدم بطريقة آمنة"""
+    if PHASE3_ENABLED:
+        try:
+            update_progress(task, status, notes)
+        except Exception:
+            pass
+
+
+def auto_commit_safe(message: str = None):
+    """Commit بطريقة آمنة"""
+    if PHASE3_ENABLED:
+        try:
+            return auto_commit(message)
+        except Exception:
+            return False, "Phase 3 غير مهيأ"
+    return False, "Phase 3 غير مهيأ"
+
+
+def auto_push_safe():
+    """Push بطريقة آمنة"""
+    if PHASE3_ENABLED:
+        try:
+            return auto_push()
+        except Exception:
+            return False, "Phase 3 غير مهيأ"
+    return False, "Phase 3 غير مهيأ"
+
 
 # ============================================================
 # إعدادات النموذج اللغوي
@@ -46,6 +97,7 @@ manager_agent = Agent(
 2. تتبع التقدم وتحديث docs/progress.md
 3. إدارة دورة العمل: Plan → Execute → Test → Fix
 4. ضمان التواصل الفعال بين الوكلاء
+5. تسجيل القرارات في memory (Phase 3)
 
 أنت تعمل عن كثب مع Architect لتحليل المتطلبات،
 ومع Developer لتنفيذ المهام،
@@ -185,6 +237,20 @@ qa_task = Task(
 )
 
 # ============================================================
+# Phase 3: Pipeline Integration
+# ============================================================
+
+def run_pipeline_task(task_description: str):
+    """تشغيل مهمة عبر Pipeline (Phase 3)"""
+    try:
+        from src.pipeline import execute_task
+        return execute_task(task_description)
+    except ImportError:
+        print("⚠️ Phase 3 Pipeline غير متوفر")
+        return None
+
+
+# ============================================================
 # فريق العمل (Crew)
 # ============================================================
 
@@ -219,5 +285,16 @@ def run_landing_page_task():
 # ============================================================
 
 if __name__ == "__main__":
-    result = run_landing_page_task()
-    print(f"\nالنتيجة:\n{result}")
+    import sys
+    
+    if len(sys.argv) > 1:
+        # Phase 3: استخدام Pipeline
+        task_description = sys.argv[1]
+        print(f"🎯 تشغيل Pipeline للمهمة: {task_description}")
+        result = run_pipeline_task(task_description)
+        if result:
+            print(f"\n📊 النتيجة: {result.status}")
+    else:
+        # Phase 2: المهمة الأولى
+        result = run_landing_page_task()
+        print(f"\nالنتيجة:\n{result}")

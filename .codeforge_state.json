@@ -1,0 +1,24 @@
+{
+  "current_task": "أضف زر تواصـل معنا إلى صفحة الهبوط الموجودة في workspace/index.html",
+  "current_task_id": "task-001",
+  "active_agent": "manager",
+  "task_status": "مكتمل",
+  "attempts": {
+    "architect": 0,
+    "developer": 0,
+    "qa": 0,
+    "manager": 0
+  },
+  "last_decision": {
+    "agent": "Reviewer",
+    "content": "نتائج المراجعة: ❌ DOCTYPE HTML5: فشل ✅ UTF-8 charset: نجاح ✅ Meta viewport: نجاح ✅ Main heading: نجاح ✅ CTA button: نجاح ✅ خلفية داكنة ✅ تدرجات لونية",
+    "impact": "operational",
+    "timestamp": "2026-07-17T02:15:10.555911",
+    "task_id": "task-001"
+  },
+  "last_commit": null,
+  "last_commit_hash": null,
+  "last_commit_time": null,
+  "phase": "phase3",
+  "task_count": 1
+}
