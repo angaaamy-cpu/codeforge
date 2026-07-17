@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة هبوط لشركة ناشئة مع 3 خدمات</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a14;
+            --bg-secondary: #12121f;
+            --bg-card: #1a1a2e;
+            --accent: #7c3aed;
+            --accent-light: #a78bfa;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--bg-card);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--accent-light);
+        }
+        .main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            background: var(--accent-light);
+        }
+        .footer {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🏗️ صفحة هبوط لشركة ناشئة مع 3 خدم...</h1>
+    </header>
+    <main class="main">
+        <div class="card">
+            <h2>مرحباً بك!</h2>
+            <p style="margin: 1rem 0; color: var(--text-secondary);">
+                تم إنشاء هذا المشروع بواسطة <strong>CodeForge</strong>
+            </p>
+            <button class="btn" onclick="alert('تم النقر!')">ابدأ الآن</button>
+        </div>
+    </main>
+    <footer class="footer">
+        <p>© 2026 CodeForge - صُنع بالذكاء الاصطناعي</p>
+    </footer>
+    <script>
+        console.log('🏗️ CodeForge: تم تحميل المشروع بنجاح');
+    </script>
+</body>
+</html>

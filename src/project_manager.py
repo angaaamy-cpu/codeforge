@@ -1,10 +1,12 @@
 """
-CodeForge Project Manager - Phase 5
+CodeForge Project Manager - Phase 8
 ===================================
 مدير المشاريع
 """
 
 import os
+import re
+import time
 import shutil
 from pathlib import Path
 from datetime import datetime
@@ -22,6 +24,97 @@ class ProjectManager:
         self.projects_dir = Path(PROJECTS_DIR)
         self.docs_dir = Path(DOCS_PROJECTS_DIR)
         self._ensure_dirs()
+
+    def generate_name(self, description: str) -> str:
+        """
+        يحول الوصف العربي إلى slug إنجليزي
+        
+        Args:
+            description: وصف المشروع
+            
+        Returns:
+            str: اسم نظيف صالح كمجلد
+        """
+        # Keywords mapping
+        keywords = {
+            "صفحة": "page",
+            "موقع": "site",
+            "تطبيق": "app",
+            "منصة": "platform",
+            "نظام": "system",
+            "متجر": "store",
+            "مشروع": "project",
+            "هبوط": "landing",
+            "مدونة": "blog",
+            "بوابة": "portal",
+            "لوحة": "dashboard",
+            "إدارة": "management",
+            "تجارة": "trade",
+            "صحة": "health",
+            "تعليم": "edu",
+            "اختبار": "quiz",
+            "حجز": "booking",
+            "عيادة": "clinic",
+            "مستشفى": "hospital",
+            "ناشئة": "startup",
+            "خدمات": "services",
+            "برمجة": "coding",
+        }
+
+        name = description.lower()
+
+        # استبدال الكلمات العربية
+        for ar, en in keywords.items():
+            name = name.replace(ar, f"_{en}_")
+
+        # إزالة الأحرف غير الإنجليزية
+        name = re.sub(r'[^a-z0-9_-]', '_', name)
+
+        # إزالة underscores المتعددة
+        name = re.sub(r'_+', '_', name)
+
+        # إزالة الشرطة في البداية والنهاية
+        name = name.strip('_')
+
+        # تحويل إلى lowercase
+        name = name.lower()
+
+        # الحد من الطول
+        if len(name) > 50:
+            name = name[:50]
+
+        return name
+
+    def ensure_unique_name(self, name: str) -> str:
+        """
+        يتحقق من عدم تكرار الاسم ويعيد اسماً نظيفاً
+        
+        Args:
+            name: الاسم المراد التحقق منه
+            
+        Returns:
+            str: اسم فريد
+        """
+        original_name = name
+        counter = 1
+
+        while self._name_exists(name):
+            name = f"{original_name}-{counter}"
+            counter += 1
+
+        return name
+
+    def _name_exists(self, name: str) -> bool:
+        """التحقق من وجود اسم"""
+        # فحص المجلد
+        if (self.projects_dir / name).exists():
+            return True
+
+        # فحص في storage
+        if docs_storage.project_exists(name):
+            return True
+
+        return False
 
     def _ensure_dirs(self):
         """التأكد من وجود المجلدات"""

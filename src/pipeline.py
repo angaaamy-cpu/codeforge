@@ -490,3 +490,94 @@ def generate_task_report(task_id: str) -> Optional[str]:
         with open(report_file, "r", encoding="utf-8") as f:
             return f.read()
     return None
+
+
+# ============================================================
+# Build Integration - Phase 8
+# ============================================================
+
+def execute(description: str, project_name: str) -> List['BuildStep']:
+    """
+    تنفيذ دورة البناء
+    
+    Args:
+        description: وصف المشروع
+        project_name: اسم المشروع
+        
+    Returns:
+        List[BuildStep]: قائمة خطوات البناء
+    """
+    from src.build_result import BuildStep
+    import time
+    
+    steps = []
+    
+    # Step 1: التخطيط
+    step1_start = time.time()
+    step1 = BuildStep(
+        step=1,
+        name="التخطيط",
+        status="running"
+    )
+    try:
+        planner = PlannerStage()
+        planner.execute({}, description)
+        step1.status = "success"
+    except Exception as e:
+        step1.status = "failed"
+        step1.error = str(e)
+    step1.duration_seconds = time.time() - step1_start
+    steps.append(step1)
+    
+    # Step 2: التطوير
+    step2_start = time.time()
+    step2 = BuildStep(
+        step=2,
+        name="التطوير",
+        status="running"
+    )
+    try:
+        executor = ExecutorStage()
+        executor.execute({}, description)
+        step2.status = "success"
+    except Exception as e:
+        step2.status = "failed"
+        step2.error = str(e)
+    step2.duration_seconds = time.time() - step2_start
+    steps.append(step2)
+    
+    # Step 3: الاختبار
+    step3_start = time.time()
+    step3 = BuildStep(
+        step=3,
+        name="الاختبار",
+        status="running"
+    )
+    try:
+        reviewer = ReviewerStage()
+        reviewer.execute({}, description)
+        step3.status = "success"
+    except Exception as e:
+        step3.status = "failed"
+        step3.error = str(e)
+    step3.duration_seconds = time.time() - step3_start
+    steps.append(step3)
+    
+    # Step 4: التوثيق
+    step4_start = time.time()
+    step4 = BuildStep(
+        step=4,
+        name="التوثيق",
+        status="running"
+    )
+    try:
+        recorder = RecorderStage()
+        recorder.execute({}, description)
+        step4.status = "success"
+    except Exception as e:
+        step4.status = "failed"
+        step4.error = str(e)
+    step4.duration_seconds = time.time() - step4_start
+    steps.append(step4)
+    
+    return steps

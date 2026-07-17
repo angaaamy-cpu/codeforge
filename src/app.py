@@ -338,6 +338,31 @@ def api_adrs():
 
 
 # ============================================================
+# API - Build - Phase 8
+# ============================================================
+
+@app.route("/api/build", methods=["POST"])
+def api_build():
+    """بناء مشروع جديد"""
+    try:
+        data = request.get_json()
+        if not data or "description" not in data:
+            return jsonify({"error": "الوصف مطلوب"}), 400
+        
+        description = data["description"]
+        
+        # Import CodeForge
+        from src.codeforge import CodeForge
+        
+        cf = CodeForge()
+        result = cf.build(description)
+        
+        return jsonify(result.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e), "status": "failed"}), 500
+
+
+# ============================================================
 # Error Handlers
 # ============================================================
 
