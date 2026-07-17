@@ -190,7 +190,7 @@ class ExecutorStage(PipelineStage):
         description_lower = task_description.lower()
 
         # إضافة زر تواصل معنا
-        if "تواصل معنا" in task_description or "contact" in description_lower:
+        if "تواصل معنا" in task_description or "contact" in description_lower or "تواصـل معنا" in task_description:
             return self._add_contact_button(context, task_description)
 
         return "تم التنفيذ بنجاح"
