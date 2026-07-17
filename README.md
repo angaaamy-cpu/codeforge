@@ -49,16 +49,17 @@ CodeForge هي منصة تطوير برمجيات متقدمة تستخدم ال
 - [x] التوثيق الأولي
 - [x] تعريف الأدوار
 
-### المرحلة 2: الوكلاء + CrewAI ✅ (الحالية)
+### المرحلة 2: الوكلاء + CrewAI ✅
 - [x] دمج CrewAI
 - [x] بناء 4 وكلاء
 - [x] ربط Gemini API
 - [x] صفحة هبوط CodeForge AI
 
-### المرحلة 3: دورة العمل + الذاكرة 📋
-- [ ] دورة عمل كاملة
-- [ ] ChromaDB للذاكرة
-- [ ] تكامل Git متقدم
+### المرحلة 3: دورة العمل + الذاكرة + Git ✅ (الحالية)
+- [x] دورة العمل الكاملة (Pipeline)
+- [x] الذاكرة الذكية
+- [x] إدارة Git
+- [x] المهمة الأولى: إضافة زر التواصل
 
 ### المرحلة 4: واجهة الهاتف + الإنتاج 📋
 - [ ] تطبيق هاتف
@@ -79,9 +80,11 @@ codeforge/
 │   ├── coding_rules.md # قواعد الترميز
 │   ├── project_conventions.md # اتفاقيات
 │   ├── qa_report.md   # تقرير الاختبار
-│   └── adr/          # Architecture Decisions
-│       ├── 001-initial-architecture.md
-│       └── 002-first-agents.md
+│   ├── adr/          # Architecture Decisions
+│   │   ├── 001-initial-architecture.md
+│   │   ├── 002-first-agents.md
+│   │   └── 003-pipeline-memory-git.md
+│   └── reports/       # تقارير المهام
 ├── agents/            # تعريف الوكلاء
 │   ├── manager/       # Manager Agent
 │   ├── architect/     # Architect Agent
@@ -89,7 +92,11 @@ codeforge/
 │   └── qa/           # QA Agent
 ├── memory/            # طبقة الذاكرة
 ├── src/               # الكود المصدري
-│   └── agents.py     # فريق الوكلاء
+│   ├── agents.py     # فريق الوكلاء (Phase 2)
+│   ├── state.py      # نظام الحالة (Phase 3)
+│   ├── memory.py     # الذاكرة الذكية (Phase 3)
+│   ├── pipeline.py   # دورة العمل (Phase 3)
+│   └── git_manager.py # إدارة Git (Phase 3)
 ├── tests/             # الاختبارات
 └── workspace/         # مساحة العمل
     └── index.html    # صفحة الهبوط
@@ -108,9 +115,10 @@ codeforge/
 - litellm >= 1.0
 - Gemini API Key (GEMINI_API_KEY)
 
-### للمرحلة 3+
-- OpenHands
-- ChromaDB
+### للمرحلة 3+ (مُثبت Phase 3)
+- Python Standard Library (state, memory, pipeline, git_manager)
+- ChromaDB (مخطط لـ Phase 4)
+- OpenHands (مخطط لـ Phase 4)
 
 ---
 
