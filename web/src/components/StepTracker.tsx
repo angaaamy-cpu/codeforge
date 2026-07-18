@@ -43,13 +43,14 @@ export default function StepTracker({ steps, running }: { steps: StepStatus[]; r
               s.state === 'error'   ? 'bg-rose-500/10 text-rose-400' :
               'bg-ink-800 text-ink-500'
             }`}
-            title={s.detail}
+            title={`${s.detail ?? ''}${s.agent ? ` — ${s.agent}` : ''}`}
           >
             {s.state === 'done'    ? <CheckCircle2 size={12} /> :
              s.state === 'running' ? <Loader2 size={12} className="animate-spin-slow" /> :
              s.state === 'error'   ? <AlertCircle size={12} /> :
                                      <Circle size={12} />}
             <span className="font-medium">{s.label}</span>
+            {s.agent && <span className="text-[9px] text-ink-600 font-mono">·{s.agent}</span>}
             {s.state === 'done' && s.duration_ms && (
               <span className="text-[10px] text-ink-500 font-mono">{s.duration_ms}ms</span>
             )}

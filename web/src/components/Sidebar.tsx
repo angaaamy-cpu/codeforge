@@ -7,7 +7,7 @@ type Props = {
   activeId: string | null
   onSelect: (p: Project) => void
   onDelete: (id: string) => void
-  files: { path: string; size: number; lang: string }[]
+  files: { path: string; size: number; lang?: string }[]
 }
 
 export default function Sidebar({ projects, activeId, onSelect, onDelete, files }: Props) {
@@ -15,7 +15,7 @@ export default function Sidebar({ projects, activeId, onSelect, onDelete, files 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ root: true })
 
   // Build tree from file paths
-  const tree = buildTree(files)
+  const tree = buildTree(files.map(f => ({ path: f.path, size: f.size, lang: f.lang ?? 'txt' })))
 
   return (
     <aside className="w-64 shrink-0 bg-ink-900 border-r border-ink-700 flex flex-col no-select">
