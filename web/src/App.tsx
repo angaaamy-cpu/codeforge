@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AuthProvider, useAuth } from '@/lib/auth'
 import { supabase, type Project, type StepStatus, type ProjectFile } from '@/lib/supabase'
-import { PIPELINE, AGENTS, AGENT_MAP, routeTask, recallMemory, storeMemory, type AgentId } from '@/lib/engine'
-import { listFiles, upsertFile } from '@/lib/storage'
+import { PIPELINE, AGENT_MAP, type AgentId } from '@/lib/engine'
+import { listFiles } from '@/lib/storage'
 import AuthScreen from '@/components/AuthScreen'
 import Sidebar from '@/components/Sidebar'
 import ChatPanel from '@/components/ChatPanel'
@@ -15,7 +15,6 @@ import FilesPanel from '@/components/FilesPanel'
 import AgentsPanel from '@/components/AgentsPanel'
 import { Key, FolderArchive, Cpu, LogOut } from 'lucide-react'
 
-const rand = (a: number, b: number) => Math.floor(a + Math.random() * (b - a))
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').trim().replace(/\s+/g, '_').slice(0, 40) || 'project'
 
@@ -63,13 +62,13 @@ function Workbench({ onSignOut, userId }: { onSignOut: () => void; userId: strin
     if (!description.trim() || running) return
     setRunning(true); setLogs([])
     const title = slugify(description)
+
+    // Insert project row first
     const initialSteps: StepStatus[] = PIPELINE.map(s => ({ key: s.key, label: s.label, detail: s.detail, agent: s.agent, state: 'pending' }))
     setSteps(initialSteps)
-
     const { data, error } = await supabase.from('projects').insert({
       title, description, status: 'building', steps: initialSteps, file_count: 0, user_id: userId,
     }).select().single()
-
     if (error || !data) {
       pushLog('Manager', `فشل إنشاء المشروع: ${error?.message ?? 'unknown'}`, 'err')
       setRunning(false); return
@@ -79,62 +78,77 @@ function Workbench({ onSignOut, userId }: { onSignOut: () => void; userId: strin
     setProjects(p => [project, ...p])
     pushLog('Manager', `بدء بناء: ${title}`, 'info')
 
-    // Recall memory for this kind of task
-    const tags = extractTags(description)
-    const recalled = await recallMemory('architect', tags, userId)
-    if (recalled.length > 0) {
-      pushLog('Architect', `تذكّر ${recalled.length} ذاكرة سابقة`, 'info')
-    }
+    // Call the real edge-function engine (streaming NDJSON)
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/codeforge-engine`
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          description, projectId: project.id, userId,
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+          supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        }),
+      })
+      if (!resp.ok || !resp.body) throw new Error(`engine ${resp.status}`)
 
-    let currentSteps = [...initialSteps]
-    let fileCount = 0
+      // Parse NDJSON stream
+      const reader = resp.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let currentSteps = [...initialSteps]
+      let fileCount = 0
 
-    for (let i = 0; i < PIPELINE.length; i++) {
-      const step = PIPELINE[i]
-      const agent = AGENT_MAP[step.agent]
-      currentSteps = currentSteps.map((s, idx) => idx === i ? { ...s, state: 'running' } : s)
-      setSteps([...currentSteps])
-      pushLog(agent.name_ar, `${step.label} — جارٍ`, 'info')
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.trim()) continue
+          let evt: any
+          try { evt = JSON.parse(line) } catch { continue }
 
-      await supabase.from('projects').update({ steps: currentSteps, updated_at: new Date().toISOString() }).eq('id', project.id)
-      // record agent run
-      const { data: runRow } = await supabase.from('agent_runs').insert({
-        project_id: project.id, user_id: userId, agent: step.agent, task: step.label, status: 'running',
-      }).select().single()
-
-      const dur = rand(step.dur[0], step.dur[1])
-      await new Promise(r => setTimeout(r, dur))
-
-      if (step.key === 'develop') {
-        // generate sample files and persist them
-        const gen = generateProjectFiles(title)
-        for (const f of gen) {
-          try { await upsertFile(project.id, f.path, f.content, 'generated') } catch {}
+          if (evt.type === 'memory') {
+            pushLog(AGENT_MAP[evt.agent as AgentId]?.name_ar ?? evt.agent, `تذكّر ${evt.count} ذاكرة سابقة`, 'info')
+          } else if (evt.type === 'search') {
+            pushLog('الباحث', evt.found ? 'تم البحث في النت' : 'تعذّر البحث', evt.found ? 'ok' : 'warn')
+          } else if (evt.type === 'step_start') {
+            const i = evt.index
+            currentSteps = currentSteps.map((s, idx) => idx === i ? { ...s, state: 'running' } : s)
+            setSteps([...currentSteps])
+            pushLog(AGENT_MAP[evt.agent as AgentId]?.name_ar ?? evt.agent, `${evt.label} — جارٍ`, 'info')
+            await supabase.from('projects').update({ steps: currentSteps, updated_at: new Date().toISOString() }).eq('id', project.id)
+          } else if (evt.type === 'step_done') {
+            const i = evt.index
+            currentSteps = currentSteps.map((s, idx) => idx === i ? { ...s, state: 'done', duration_ms: evt.duration_ms } : s)
+            setSteps([...currentSteps])
+            pushLog(AGENT_MAP[evt.agent as AgentId]?.name_ar ?? evt.agent, `${evt.label} — اكتمل (${evt.duration_ms}ms)`, 'ok')
+            await supabase.from('projects').update({ steps: currentSteps, updated_at: new Date().toISOString() }).eq('id', project.id)
+          } else if (evt.type === 'complete') {
+            fileCount = evt.file_count ?? 0
+            pushLog('Manager', `اكتمل البناء — ${fileCount} ملف`, 'ok')
+          }
         }
-        fileCount = gen.length
-        const fresh = await listFiles(project.id)
-        setFiles(fresh)
       }
 
-      currentSteps = currentSteps.map((s, idx) => idx === i ? { ...s, state: 'done', duration_ms: dur } : s)
-      setSteps([...currentSteps])
-      pushLog(agent.name_ar, `${step.label} — اكتمل (${dur}ms)`, 'ok')
+      // Refresh files from DB (engine wrote them)
+      const fresh = await listFiles(project.id)
+      setFiles(fresh)
+      fileCount = fresh.length
 
-      // update run
-      if (runRow) {
-        await supabase.from('agent_runs').update({ status: 'done', duration_ms: dur, result: step.detail }).eq('id', runRow.id)
-      }
-      await supabase.from('projects').update({ steps: currentSteps, file_count: fileCount, updated_at: new Date().toISOString() }).eq('id', project.id)
-
-      // store a memory per step (experience accumulation)
-      await storeMemory(step.agent, 'note', `${step.label} على «${title}»: ${step.detail}`, tags, userId, project.id, 0.5)
+      const finalProject: Project = { ...project, status: 'completed', steps: currentSteps, file_count: fileCount, updated_at: new Date().toISOString() }
+      await supabase.from('projects').update({ status: 'completed', steps: currentSteps, file_count: fileCount, updated_at: finalProject.updated_at }).eq('id', project.id)
+      setProjects(p => p.map(x => x.id === project.id ? finalProject : x))
+      setPreviewHtml(buildPreviewHtml(title))
+    } catch (e: any) {
+      pushLog('Manager', `خطأ في المحرك: ${e.message}`, 'err')
+      await supabase.from('projects').update({ status: 'failed', updated_at: new Date().toISOString() }).eq('id', project.id)
     }
-
-    const finalProject: Project = { ...project, status: 'completed', steps: currentSteps, file_count: fileCount, updated_at: new Date().toISOString() }
-    await supabase.from('projects').update({ status: 'completed', steps: currentSteps, file_count: fileCount, updated_at: finalProject.updated_at }).eq('id', project.id)
-    setProjects(p => p.map(x => x.id === project.id ? finalProject : x))
-    setPreviewHtml(buildPreviewHtml(title))
-    pushLog('Manager', 'اكتمل البناء بنجاح', 'ok')
     setRunning(false)
   }
 
@@ -189,26 +203,6 @@ function Workbench({ onSignOut, userId }: { onSignOut: () => void; userId: strin
       {panel === 'agents' && <AgentsPanel onClose={() => setPanel(null)} userId={userId} />}
     </div>
   )
-}
-
-function extractTags(desc: string): string[] {
-  const words = desc.toLowerCase().split(/\s+/).filter(w => w.length > 3)
-  return Array.from(new Set(words)).slice(0, 5)
-}
-
-function generateProjectFiles(title: string): { path: string; content: string }[] {
-  return [
-    {
-      path: 'index.html',
-      content: `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${title}</title><link rel="stylesheet" href="style.css"/></head><body><div class="hero"><h1>${title.replace(/_/g,' ')}</h1><p>مشروع توليد بواسطة CodeForge</p><a class="btn" href="#">ابدأ</a></div><script src="script.js"></script></body></html>`,
-    },
-    {
-      path: 'style.css',
-      content: `*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#0a0b0f;color:#eef1f5}.hero{padding:80px 24px;text-align:center}.hero h1{font-size:40px;background:linear-gradient(90deg,#22d3ee,#10b981);-webkit-background-clip:text;color:transparent}.btn{display:inline-block;padding:10px 22px;border-radius:10px;background:linear-gradient(90deg,#22d3ee,#06b6d4);color:#0a0b0f;font-weight:600;text-decoration:none}`,
-    },
-    { path: 'script.js', content: `console.log('${title} ready');` },
-    { path: 'README.md', content: `# ${title}\n\nمشروع تم توليده بواسطة CodeForge.\n` },
-  ]
 }
 
 function buildPreviewHtml(title: string) {
