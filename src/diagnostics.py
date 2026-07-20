@@ -192,24 +192,30 @@ class SystemDiagnostics:
         """فحص Model Providers"""
         try:
             from src.model_provider import provider_registry
-            
+
             providers = provider_registry.list_all()
             has_active = provider_registry.has_provider()
+            mode = provider_registry.mode  # "real" | "mock" | "unavailable" (Phase 4)
             active_provider = None
-            
+
             for p in providers:
                 if p["active"]:
                     active_provider = p["name"]
                     break
-            
+
+            # mode="mock" ليس خطأ، لكنه يستحق تنبيهاً واضحاً - لا يظهر كـ "ok"
+            # صامت وكأنه ذكاء حقيقي (انظر AUDIT_REPORT.md C3 وPhase 4 rules).
+            status = "warning" if mode == "mock" else ("ok" if mode == "real" else "warning")
+
             return DiagnosticResult(
                 name="model_providers",
-                status="ok",
-                message=f"Active provider: {active_provider or 'None'}",
+                status=status,
+                message=f"Provider mode: {mode} (active: {active_provider or 'None'})",
                 details={
                     "providers": providers,
                     "has_active": has_active,
                     "active": active_provider,
+                    "mode": mode,
                 },
             )
         except Exception as e:
