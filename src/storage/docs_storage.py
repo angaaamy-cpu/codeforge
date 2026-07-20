@@ -212,41 +212,63 @@ class DocsStorage(BaseStorage):
     # ============================================================
 
     def list_adrs(self) -> List[ADR]:
-        """قائمة القرارات المعمارية"""
+        """قائمة القرارات المعمارية
+
+        Phase 7 (Organizational Memory - narrow scope): كانت هذه الدالة
+        تبحث عن ملفات بنمط "ADR-*.md" فقط، بينما كل ملف ADR حقيقي في
+        المستودع (001 حتى 013) مُسمّى "NNN-slug.md" بلا بادئة "ADR-"
+        إطلاقاً. النتيجة: هذه الدالة (ومعها /api/adrs) كانت تُرجع قائمة
+        فارغة دائماً رغم وجود 13 قراراً معمارياً فعلياً - مُتحقَّق مباشرة
+        قبل هذا الإصلاح. النمط أدناه يقبل الشكلين معاً (المُستخدَم فعلياً
+        NNN-slug.md، وADR-NNN-slug.md احتياطاً لأي ملف مستقبلي بذلك الاسم).
+        """
         adrs = []
-        
+
         if not self.adr_dir.exists():
             return adrs
-        
-        for adr_file in sorted(self.adr_dir.glob("ADR-*.md")):
-            try:
-                content = adr_file.read_text(encoding="utf-8")
-                number = int(re.search(r"ADR-(\d+)", adr_file.name).group(1))
-                
-                # Extract title
-                title_match = re.search(r"# ADR-\d+: (.+)", content)
-                title = title_match.group(1) if title_match else adr_file.stem
-                
-                # Extract status
-                status_match = re.search(r"\*\*الحالة\*\*.*?\*\*([^*]+)\*\*", content)
-                status = status_match.group(1).strip() if status_match else "unknown"
-                
-                adrs.append(ADR(
-                    number=number,
-                    title=title,
-                    status=status,
-                    agent="unknown",
-                    content=content[:500],
-                ))
-            except (ValueError, AttributeError):
-                continue
-        
-        return adrs
+
+        seen_files = set()
+        patterns = ["[0-9][0-9][0-9]-*.md", "ADR-*.md"]
+
+        for pattern in patterns:
+            for adr_file in sorted(self.adr_dir.glob(pattern)):
+                if adr_file in seen_files:
+                    continue
+                seen_files.add(adr_file)
+                try:
+                    content = adr_file.read_text(encoding="utf-8")
+
+                    number_match = re.search(r"(?:ADR-)?(\d+)", adr_file.name)
+                    if not number_match:
+                        continue
+                    number = int(number_match.group(1))
+
+                    # العنوان: أول سطر H1 في الملف - يعمل مع "# ADR-013: ..."
+                    # وأيضاً مع "# اسم الملف بلا بادئة ADR" (النمط الفعلي المُستخدَم)
+                    title_match = re.search(r"^#\s+(?:ADR-\d+:\s*)?(.+)$", content, re.MULTILINE)
+                    title = title_match.group(1).strip() if title_match else adr_file.stem
+
+                    status_match = re.search(r"\*\*(?:الحالة|Status)\*\*[:\s]*\**([^\n*]+)\**", content)
+                    status = status_match.group(1).strip() if status_match else "unknown"
+
+                    adrs.append(ADR(
+                        number=number,
+                        title=title,
+                        status=status,
+                        agent="unknown",
+                        content=content[:500],
+                    ))
+                except (ValueError, AttributeError, OSError):
+                    continue
+
+        return sorted(adrs, key=lambda a: a.number)
 
     def adr_exists(self, number: int) -> bool:
-        """فحص وجود ADR"""
-        adr_file = self.adr_dir / f"ADR-{number:03d}-*.md"
-        return bool(list(self.adr_dir.glob(f"ADR-{number:03d}-*.md")))
+        """فحص وجود ADR - يقبل NNN-slug.md (الفعلي) وADR-NNN-slug.md (احتياطاً)"""
+        return bool(
+            list(self.adr_dir.glob(f"{number:03d}-*.md"))
+            or list(self.adr_dir.glob(f"ADR-{number:03d}-*.md"))
+        )
 
     # ============================================================
     # Report Operations
