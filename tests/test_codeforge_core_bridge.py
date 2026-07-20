@@ -25,20 +25,28 @@ def test_codeforge_instantiates_all_core_singletons():
 
 
 def test_builtin_capabilities_are_registered_but_have_no_real_tools():
-    """يثبت النتيجة المحورية في ADR-013: القدرات المدمجة (بما فيها
-    'terminal') أسماء ميتاداتا فقط - لا handler حقيقي مربوط بأي منها."""
+    """يثبت النتيجة المحورية في ADR-013 كما كانت قبل Phase 5: القدرات
+    المدمجة أسماء ميتاداتا فقط. Phase 5 (انظر src/Core/builtin_tools.py
+    وdocs/adr/013-src-core-architectural-status.md §7) ربط أدوات حقيقية
+    عمداً لـ files/git فقط - كل ما عداهما (وخصوصاً terminal، انظر
+    docs/security/TERMINAL_CAPABILITY_SECURITY_REVIEW.md) يبقى فارغاً."""
     import src.codeforge as cf
     instance = cf.CodeForge()
     caps = {c["name"]: c for c in instance.list_capabilities()}
     assert "terminal" in caps
     assert "files" in caps
     assert "git" in caps
-    # لا "tools" فعلية مسجَّلة لأي قدرة مدمجة حالياً
+
+    wired_by_phase5 = {"files", "git"}
     for name, cap_dict in caps.items():
-        assert cap_dict.get("tools", []) == [], (
-            f"القدرة '{name}' لديها tools مربوطة فعلياً - "
-            f"إن كان هذا مقصوداً، حدِّث ADR-013 وهذا الاختبار معاً"
-        )
+        tools = cap_dict.get("tools", [])
+        if name in wired_by_phase5:
+            assert tools != [], f"Phase 5 يفترض ربط أدوات حقيقية لـ '{name}'"
+        else:
+            assert tools == [], (
+                f"القدرة '{name}' لديها tools مربوطة فعلياً خارج نطاق Phase 5 - "
+                f"إن كان هذا مقصوداً، حدِّث ADR-013 وهذا الاختبار معاً"
+            )
 
 
 def test_event_bus_receives_real_events_on_build_start():

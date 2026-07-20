@@ -12,6 +12,7 @@ from src.Core.memory import ProjectMemory, project_memory, MemoryEntry
 from src.Core.plugin import PluginManager, plugin_manager, BasePlugin, Plugin, PluginManifest
 from src.Core.secrets import SecretsManager, secrets_manager, Secret, SecretMetadata
 from src.Core.deployment import DeploymentManager, deployment_manager, Deployment, DeploymentPlatform, DeploymentStatus, DeploymentConfig
+from src.Core.builtin_tools import wire_production_tools
 
 __all__ = [
     # Capability System
@@ -60,4 +61,6 @@ __all__ = [
     "DeploymentPlatform",
     "DeploymentStatus",
     "DeploymentConfig",
+    # Phase 5: files/git tool adapter
+    "wire_production_tools",
 ]
