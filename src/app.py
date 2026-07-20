@@ -22,7 +22,10 @@ app.config["JSON_AS_ASCII"] = False
 
 try:
     from config import APP_NAME, APP_VERSION, CURRENT_PHASE
-    from config.settings import FLASK_HOST, FLASK_PORT, FLASK_DEBUG
+    from config.settings import (
+        FLASK_HOST, FLASK_PORT, FLASK_DEBUG,
+        ADMIN_API_KEY, ADMIN_API_KEY_IS_EPHEMERAL,
+    )
     from src.state import (
         get_state_dict, get_state_summary, state_manager,
         add_history, increment_completed, TaskStatus
@@ -40,6 +43,41 @@ try:
 except ImportError as e:
     STATE_OK = False
     print(f"⚠️ خطأ في التحميل: {e}")
+
+# ============================================================
+# Phase 1: API Authentication - Default Deny
+# ============================================================
+# كل /api/* محمي افتراضياً. الاستثناء الوحيد المسموح به علناً: GET /api/health.
+# انظر AUDIT_REPORT.md (R1) وSYSTEM_INVARIANTS.md للسياق.
+
+import hmac as _hmac
+
+PUBLIC_API_ALLOWLIST = {("GET", "/api/health")}
+
+if ADMIN_API_KEY_IS_EPHEMERAL:
+    print("=" * 50)
+    print("⚠️  ADMIN_API_KEY لم يُضبط عبر environment variable.")
+    print(f"🔑 تم توليد مفتاح مؤقت لهذه الجلسة فقط: {ADMIN_API_KEY}")
+    print("   اضبط ADMIN_API_KEY في بيئة الإنتاج لتفادي تغيّره عند كل إعادة تشغيل.")
+    print("=" * 50)
+
+
+@app.before_request
+def _enforce_api_authentication():
+    """Default-deny middleware لكل /api/* عدا GET /api/health."""
+    path = request.path
+    if not path.startswith("/api/"):
+        return None  # واجهة الويب (templates/static) غير متأثرة بهذه الطبقة
+
+    if (request.method, path) in PUBLIC_API_ALLOWLIST:
+        return None
+
+    provided = request.headers.get("X-API-Key", "")
+    if not provided or not _hmac.compare_digest(provided, ADMIN_API_KEY):
+        return jsonify({"error": "unauthorized"}), 401
+
+    return None
+
 
 # ============================================================
 # Routes - UI

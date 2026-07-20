@@ -39,6 +39,24 @@ FLASK_DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
 SECRET_KEY = os.environ.get("SECRET_KEY", "codeforge-secret-key-change-in-production")
 
 # ============================================================
+# Phase 1: API Authentication (Temporary Admin Authentication)
+# ============================================================
+# مؤقت: مصادقة admin بسيطة لسد ثغرة /api/* المفتوحة بالكامل.
+# المستقبل: Full Identity & Authorization Architecture (انظر AUDIT_REPORT.md R1).
+#
+# لا fallback ثابت هنا عمداً (بخلاف SECRET_KEY أعلاه الذي كان له fallback
+# مكشوف في الكود العام - انظر AUDIT_REPORT.md F7). إن لم يُضبط ADMIN_API_KEY
+# صراحة عبر environment variable، يُولَّد مفتاح عشوائي مؤقت عند إقلاع العملية
+# ويُطبع مرة واحدة في السجلات (stdout) ليستخدمه المالك محلياً - وهو مختلف
+# في كل إعادة تشغيل، وليس تخمينياً.
+import secrets as _stdlib_secrets
+
+ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "").strip()
+ADMIN_API_KEY_IS_EPHEMERAL = not bool(ADMIN_API_KEY)
+if ADMIN_API_KEY_IS_EPHEMERAL:
+    ADMIN_API_KEY = _stdlib_secrets.token_urlsafe(32)
+
+# ============================================================
 # Agent Settings
 # ============================================================
 
