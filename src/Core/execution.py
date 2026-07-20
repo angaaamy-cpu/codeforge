@@ -13,12 +13,18 @@ import traceback
 from src.Core.event_bus import EventType, Event, emit
 
 
+class _CapabilityNotFound(Exception):
+    """Phase 6: القدرة/الأداة المطلوبة غير مسجَّلة - BLOCKED لا FAILED."""
+    pass
+
+
 class ExecutionStatus(str, Enum):
     """حالة التنفيذ"""
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
+    BLOCKED = "blocked"  # Phase 6: القدرة/الأداة غير موجودة - لم يُحاول التنفيذ أصلاً، ليس فشلاً بعد محاولة حقيقية
     CANCELLED = "cancelled"
     PAUSED = "paused"
 
@@ -34,7 +40,14 @@ class ExecutionStep:
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     duration_seconds: float = 0.0
-    
+    # Phase 6: خطوة قد ترتبط بقدرة/أداة حقيقية (src.Core.capability). إن لم
+    # تُحدَّد capability/tool، تبقى خطوة وصفية (سلوك ما قبل Phase 6، محفوظ
+    # للتوافق الخلفي - لا يُنفَّذ عبرها شيء حقيقي).
+    capability: Optional[str] = None
+    tool: Optional[str] = None
+    params: Dict[str, Any] = field(default_factory=dict)
+    attempts: int = 0
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -43,6 +56,9 @@ class ExecutionStep:
             "result": str(self.result) if self.result else None,
             "error": self.error,
             "duration_seconds": self.duration_seconds,
+            "capability": self.capability,
+            "tool": self.tool,
+            "attempts": self.attempts,
         }
 
 
@@ -93,17 +109,20 @@ class ExecutionEngine:
         description: str,
         workspace: str = "",
         task_id: str = None,
-        steps: List[str] = None,
+        steps: List[Any] = None,
     ) -> ExecutionContext:
         """
         تنفيذ مهمة
-        
+
         Args:
             description: وصف المهمة
             workspace: مساحة العمل
             task_id: معرف المهمة
-            steps: قائمة الخطوات
-            
+            steps: قائمة الخطوات - كل عنصر إما:
+                   - str: خطوة وصفية فقط (سلوك ما قبل Phase 6، بلا تنفيذ حقيقي)
+                   - dict: {"name": ..., "capability": ..., "tool": ..., "params": {...}}
+                     لتنفيذ حقيقي عبر src.Core.capability.CapabilityRegistry
+
         Returns:
             ExecutionContext
         """
@@ -127,9 +146,18 @@ class ExecutionEngine:
                 "documentation",
             ]
         
-        # Create execution steps
-        for i, step_name in enumerate(steps):
-            context.steps.append(ExecutionStep(id=i, name=step_name))
+        # Create execution steps (str = وصفية، dict = مرتبطة بقدرة حقيقية)
+        for i, step_def in enumerate(steps):
+            if isinstance(step_def, dict):
+                context.steps.append(ExecutionStep(
+                    id=i,
+                    name=step_def.get("name", f"step-{i}"),
+                    capability=step_def.get("capability"),
+                    tool=step_def.get("tool"),
+                    params=step_def.get("params", {}),
+                ))
+            else:
+                context.steps.append(ExecutionStep(id=i, name=step_def))
         
         # Store context
         self._active_contexts[task_id] = context
@@ -145,7 +173,9 @@ class ExecutionEngine:
     
     def run_steps(self, context: ExecutionContext) -> ExecutionContext:
         """
-        تشغيل الخطوات بالتسلسل
+        تشغيل الخطوات بالتسلسل، مع إعادة محاولة (retry) للخطوات المرتبطة
+        بقدرة/أداة حقيقية فقط (Phase 6). self._max_retries كان مُعرَّفاً
+        بلا استخدام فعلي قبل هذا - الآن يُطبَّق فعلياً.
         """
         context.current_step = 0
         
@@ -158,35 +188,60 @@ class ExecutionEngine:
                 "step": step.name,
                 "step_id": step.id,
             })
-            
-            try:
-                # Execute step - can be overridden by actual implementation
-                result = self._execute_step(step, context)
-                step.result = result
-                step.status = ExecutionStatus.COMPLETED
-                
-                emit(EventType.BUILD_STEP_COMPLETED, {
-                    "task_id": context.task_id,
-                    "step": step.name,
-                })
-                
-            except Exception as e:
-                step.error = str(e)
-                step.status = ExecutionStatus.FAILED
-                
-                emit(EventType.EXECUTION_FAILED, {
-                    "task_id": context.task_id,
-                    "step": step.name,
-                    "error": str(e),
-                })
-                
+
+            max_attempts = self._max_retries if (step.capability and step.tool) else 1
+            last_error = None
+
+            for attempt in range(1, max_attempts + 1):
+                step.attempts = attempt
+                try:
+                    result = self._execute_step(step, context)
+                    step.result = result
+                    step.status = ExecutionStatus.COMPLETED
+                    step.error = ""
+                    last_error = None
+
+                    emit(EventType.BUILD_STEP_COMPLETED, {
+                        "task_id": context.task_id,
+                        "step": step.name,
+                        "attempts": attempt,
+                    })
+                    break
+
+                except _CapabilityNotFound as e:
+                    # BLOCKED: لا يوجد ما يمكن محاولته أصلاً - لا فائدة من
+                    # إعادة المحاولة، وليس "فشلاً" بعد تنفيذ حقيقي.
+                    step.error = str(e)
+                    step.status = ExecutionStatus.BLOCKED
+                    last_error = e
+                    emit(EventType.EXECUTION_FAILED, {
+                        "task_id": context.task_id,
+                        "step": step.name,
+                        "error": str(e),
+                        "status": "blocked",
+                    })
+                    break
+
+                except Exception as e:
+                    last_error = e
+                    step.error = str(e)
+                    if attempt < max_attempts:
+                        continue  # إعادة محاولة حقيقية
+                    step.status = ExecutionStatus.FAILED
+                    emit(EventType.EXECUTION_FAILED, {
+                        "task_id": context.task_id,
+                        "step": step.name,
+                        "error": str(e),
+                        "attempts": attempt,
+                    })
+
+            if step.started_at:
+                step.completed_at = datetime.now()
+                step.duration_seconds = (step.completed_at - step.started_at).total_seconds()
+
+            if step.status in (ExecutionStatus.FAILED, ExecutionStatus.BLOCKED):
                 return context
-            
-            finally:
-                if step.started_at:
-                    step.completed_at = datetime.now()
-                    step.duration_seconds = (step.completed_at - step.started_at).total_seconds()
-            
+
             context.current_step += 1
         
         # All steps completed
@@ -198,11 +253,29 @@ class ExecutionEngine:
     
     def _execute_step(self, step: ExecutionStep, context: ExecutionContext) -> Any:
         """
-        Execute a single step
-        
-        Override this method for actual implementation
+        تنفيذ خطوة واحدة.
+
+        Phase 6: إن كانت الخطوة مرتبطة بـ capability+tool حقيقيين، يُنفَّذ
+        الاستدعاء الفعلي عبر src.Core.capability.CapabilityRegistry - لا
+        نجاح مُختلَق. خطوات بلا capability/tool (السلوك القديم قبل
+        Phase 6، مثل "planning"/"testing" الوصفية) تبقى كما كانت.
         """
-        # Placeholder - actual implementation would call the appropriate capability
+        if step.capability and step.tool:
+            from src.Core.capability import CapabilityRegistry
+            cap = CapabilityRegistry().get(step.capability)
+            if cap is None:
+                raise _CapabilityNotFound(
+                    f"القدرة '{step.capability}' غير مُسجَّلة"
+                )
+            tool = cap.get_tool(step.tool)
+            if tool is None:
+                raise _CapabilityNotFound(
+                    f"الأداة '{step.tool}' غير موجودة في القدرة '{step.capability}' "
+                    f"(الأدوات المتاحة: {list(cap.tools.keys())})"
+                )
+            return tool.execute(**step.params)
+
+        # سلوك ما قبل Phase 6: خطوة وصفية بلا ربط حقيقي - Placeholder مقصود
         return {"status": "success", "step": step.name}
     
     def cancel(self, task_id: str) -> bool:
