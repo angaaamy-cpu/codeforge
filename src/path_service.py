@@ -17,17 +17,21 @@ from dataclasses import dataclass
 
 # Global path configuration
 def _get_workspace_root() -> Path:
-    """كشف المسار الجذر من متغيرات البيئة أو الموقع"""
-    # 1. Check WORKSPACE_ROOT environment variable
+    """كشف المسار الجذر من متغيرات البيئة أو الموقع.
+
+    Phase 3 (Runtime Stability): أُزيل افتراض "/app" الثابت لـ Railway (كان
+    يفشل صامتاً إن لم يكن /app هو المسار الفعلي أو غير قابل للكتابة -
+    انظر AUDIT_REPORT.md §Path System). الاعتماد الآن دائماً على موقع هذا
+    الملف الفعلي (__file__) كافتراضي موثوق عبر كل البيئات (Local/Replit/
+    Docker/Railway)، مع بقاء WORKSPACE_ROOT كتجاوز صريح لمن يحتاجه.
+    """
+    # 1. Check WORKSPACE_ROOT environment variable (تجاوز صريح، الأولوية القصوى)
     if os.environ.get("WORKSPACE_ROOT"):
         return Path(os.environ["WORKSPACE_ROOT"]).resolve()
-    
-    # 2. Check if running on Railway
-    if os.environ.get("RAILWAY_ENVIRONMENT"):
-        return Path("/app")
-    
-    # 3. Use the project root (parent of src/)
-    # This works because path_service.py is in src/
+
+    # 2. Default: مبني على الموقع الفعلي لهذا الملف - يعمل بشكل متطابق على
+    #    Local / Replit / Docker / Railway (Nixpacks أو غيره) دون افتراض
+    #    مسار نشر معيّن. path_service.py موجود دائماً في <root>/src/.
     return Path(__file__).parent.parent.resolve()
 
 
@@ -145,15 +149,23 @@ class PathService:
     def is_within_root(self, path: Union[str, Path]) -> bool:
         """
         فحص إذا كان المسار ضمن الجذر (أمان)
-        
+
         Args:
             path: مسار للفحص
-            
+
         Returns:
             True إذا كان ضمن الجذر
+
+        ملاحظة (Phase 3): كانت هذه الدالة تستخدم Path(path).resolve() مباشرة،
+        والذي يُحلّل المسارات النسبية اعتماداً على CWD الحالي للعملية - وليس
+        self.root. هذا يجعل الفحص (وبالتالي write/mkdir/delete/copy/move،
+        التي تعتمد جميعها على is_within_root) يفشل لأي مسار نسبي متى ما
+        اختلف CWD عن self.root (حالة حقيقية عبر بيئات النشر المختلفة).
+        الإصلاح: استخدام self.resolve() نفسها (التي تُحلّل المسارات النسبية
+        بضمّها إلى self.root أولاً) بدل إعادة تنفيذ منطق مختلف هنا.
         """
         try:
-            resolved = Path(path).resolve()
+            resolved = self.resolve(path)
             resolved.relative_to(self.root)
             return True
         except ValueError:
