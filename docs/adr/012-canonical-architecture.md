@@ -32,3 +32,10 @@
 
 ## الأثر (Blast Radius) لو تجاهلنا هذا القرار
 استمرار التطوير على أي من المسارات الثلاثة دون تصنيف واضح يعني تكرار العمل، وتوثيقاً مضللاً (كما وُثِّق في `CONTRADICTIONS.md`)، وخطر تراكمي على قابلية الصيانة.
+
+---
+
+## Errata (تصحيح لاحق — Phase 5 Architecture Safety Gate Investigation)
+
+تصنيف `src/Core/*` أعلاه كـ"غير موصولة بأي مسار منشور" **غير دقيق بالكامل**. تحقيق أعمق (انظر `docs/adr/013-src-core-architectural-status.md`) وجد أن `src/codeforge.py` **يستورد فعلياً** `from src.Core import (...)`، ويُستدعى هذا الملف فعلياً من `src/app.py` (مسار `/api/build`، سطر 404-406). النتيجة: `src/Core/event_bus.py` و`src/Core/workspace.py` و`src/Core/capability.py` (تسجيل ميتاداتا فقط) **تعمل فعلياً في الإنتاج**، بينما `execution.py`/`deployment.py`/`secrets.py`/`memory.py`/`plugin.py` تُبنى (Instantiate) فقط دون استدعاء فعلي لمنطقها لاحقاً، و`sdk.py` ميت بالكامل (لا مستورد له إطلاقاً). للتصنيف الدقيق لكل ملف على حدة، انظر ADR-013 وليس الجدول أعلاه.
+

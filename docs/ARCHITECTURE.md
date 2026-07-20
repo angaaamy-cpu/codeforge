@@ -21,23 +21,29 @@ flowchart TD
     APP --> EL[src/event_logger.py]
     APP --> CF["src/codeforge.py"]
     CF --> BE[src/build_engine.py]
+    CF -.->|"deferred import,<br/>try/except-guarded"| COREINIT["src/Core/__init__.py"]
+    COREINIT --> EB["Core/event_bus.py ✅ Active<br/>(real events on every build)"]
+    COREINIT --> WS["Core/workspace.py ✅ Active<br/>(writes workspaces/.workspaces.json)"]
+    COREINIT --> CAP["Core/capability.py ⚠️ metadata-only<br/>(9 built-ins registered, 0 real tools)"]
+    COREINIT -.->|"instantiated, never invoked"| INERT["Core/execution.py, deployment.py,<br/>secrets.py, plugin.py, memory.py<br/>❌ Placeholder"]
     BE --> PIPE[src/pipeline.py]
     PIPE --> PR[src/model_provider/registry.py]
-    PR --> MOCK[MockProvider ✅ نشط]
-    PR -.-> GEM["GeminiProvider (Phase 4)"]
-    PR -.-> OAI["OpenAIProvider (Phase 4)"]
+    PR --> MOCK[MockProvider - active by default]
+    PR --> GEM["GeminiProvider (Phase 4, real if healthy)"]
+    PR --> OAI["OpenAIProvider (Phase 4, real if healthy)"]
     BE --> PS[src/path_service.py]
     APP --> GIT[src/git_manager.py]
 
-    subgraph Disconnected["غير موصول بالمسار الفعلي"]
+    subgraph Disconnected["منفصل تماماً - لا استيراد من أي مسار منشور"]
         AGENTS["src/agents.py (CrewAI)<br/>❌ dead code"]
-        CORE["src/Core/* (execution/deployment/secrets/...)<br/>⚠️ غالبها placeholder"]
+        SDK["src/Core/sdk.py<br/>❌ dead code (0 importers)"]
         WEB["web/ (React+Supabase)<br/>+ Edge Function<br/>❓ حالة نشر غير معروفة"]
     end
+
 ```
 
 ## تصنيف المكوّنات
-انظر الجدول الكامل في `docs/adr/012-canonical-architecture.md`.
+انظر التصنيف الدقيق (لكل ملف على حدة، بالدليل) في `docs/adr/013-src-core-architectural-status.md`. القرار العلوي التلخيصي في `docs/adr/012-canonical-architecture.md` (مع تصحيح Errata في نهايته).
 
 ## حقيقة المزوّدين (Providers) حالياً
 - **Mock**: الوحيد النشط فعلياً في أي بيئة نشر حالية بلا تدخل إضافي.
