@@ -33,6 +33,7 @@ flowchart TD
     PR --> OAI["OpenAIProvider (Phase 4, real if healthy)"]
     BE --> PS[src/path_service.py]
     APP --> GIT[src/git_manager.py]
+    APP --> KGAPI["GET /api/knowledge/graph, /impact/&lt;id&gt;<br/>✅ Phase 8 - derived from real sources, see docs/KNOWLEDGE_GRAPH.md"]
 
     subgraph Disconnected["منفصل تماماً - لا استيراد من أي مسار منشور"]
         AGENTS["src/agents.py (CrewAI)<br/>❌ dead code"]
