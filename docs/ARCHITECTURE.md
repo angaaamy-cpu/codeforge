@@ -1,6 +1,6 @@
-# ARCHITECTURE.md — الحالة الفعلية المُتحقَّقة (Phase 2)
+# ARCHITECTURE.md — الحالة الفعلية المُتحقَّقة (محدَّث حتى Phase 7)
 
-> هذا المستند يعكس **ما يعمل فعلياً** بدليل مباشر (تتبع استيراد + اختبار تشغيل)، وليس النية الأصلية. للقرار الرسمي انظر `docs/adr/012-canonical-architecture.md`. للتفاصيل الجنائية الكاملة انظر `AUDIT_REPORT.md`.
+> هذا المستند يعكس **ما يعمل فعلياً** بدليل مباشر (تتبع استيراد + اختبار تشغيل)، وليس النية الأصلية. للقرار الرسمي انظر `docs/adr/012-canonical-architecture.md`. للتفاصيل الجنائية الكاملة انظر `AUDIT_REPORT.md`. لسجل التغييرات الكامل انظر `CHANGELOG.md`.
 
 ## مخطط النظام (Production Path فقط)
 
@@ -24,8 +24,9 @@ flowchart TD
     CF -.->|"deferred import,<br/>try/except-guarded"| COREINIT["src/Core/__init__.py"]
     COREINIT --> EB["Core/event_bus.py ✅ Active<br/>(real events on every build)"]
     COREINIT --> WS["Core/workspace.py ✅ Active<br/>(writes workspaces/.workspaces.json)"]
-    COREINIT --> CAP["Core/capability.py ⚠️ metadata-only<br/>(9 built-ins registered, 0 real tools)"]
-    COREINIT -.->|"instantiated, never invoked"| INERT["Core/execution.py, deployment.py,<br/>secrets.py, plugin.py, memory.py<br/>❌ Placeholder"]
+    COREINIT --> CAP["Core/capability.py ✅ files/git wired (Phase 5)<br/>⚠️ terminal/http/etc still metadata-only"]
+    COREINIT --> EXEC["Core/execution.py ✅ real capability execution + retry (Phase 6)<br/>⚠️ not wired into /api/build"]
+    COREINIT -.->|"instantiated, never invoked"| INERT["Core/deployment.py, secrets.py,<br/>plugin.py, memory.py<br/>❌ still Placeholder"]
     BE --> PIPE[src/pipeline.py]
     PIPE --> PR[src/model_provider/registry.py]
     PR --> MOCK[MockProvider - active by default]
@@ -33,6 +34,7 @@ flowchart TD
     PR --> OAI["OpenAIProvider (Phase 4, real if healthy)"]
     BE --> PS[src/path_service.py]
     APP --> GIT[src/git_manager.py]
+    APP --> ADRAPI["GET /api/adrs -> docs_storage.list_adrs()<br/>✅ fixed in Phase 7 (was always empty)"]
 
     subgraph Disconnected["منفصل تماماً - لا استيراد من أي مسار منشور"]
         AGENTS["src/agents.py (CrewAI)<br/>❌ dead code"]
@@ -43,15 +45,15 @@ flowchart TD
 ```
 
 ## تصنيف المكوّنات
-انظر التصنيف الدقيق (لكل ملف على حدة، بالدليل) في `docs/adr/013-src-core-architectural-status.md`. القرار العلوي التلخيصي في `docs/adr/012-canonical-architecture.md` (مع تصحيح Errata في نهايته).
+انظر التصنيف الدقيق (لكل ملف على حدة، بالدليل) في `docs/adr/013-src-core-architectural-status.md`. القرار العلوي التلخيصي في `docs/adr/012-canonical-architecture.md` (مع تصحيح Errata في نهايته). **ملاحظة**: `capability.py` و`execution.py` تغيّر تصنيفهما جزئياً بعد Phase 5/6 (files/git أصبحا Active فعلياً) - الجدول في ADR-013 يعكس الحالة *قبل* Phase 5؛ `CHANGELOG.md` يوثّق كل تغيير لاحق بدليله.
 
 ## حقيقة المزوّدين (Providers) حالياً
-- **Mock**: الوحيد النشط فعلياً في أي بيئة نشر حالية بلا تدخل إضافي.
-- **Gemini / OpenAI**: طبقة الواجهة (`registry.py`) موجودة، **لكن ملفات التنفيذ الفعلية أُضيفت في Phase 4** (انظر `PHASE4_PROVIDERS.md`).
+- **Mock**: نشط افتراضياً ما لم يُضبَط مزوّد حقيقي وسليم.
+- **Gemini / OpenAI**: مُنفَّذان فعلياً (Phase 4) - انظر `CHANGELOG.md` §Phase 4 وقيد الاتصال الحي الصادق المذكور فيه.
 
 ## حقيقة الأمان
-طبقة Default-Deny على `/api/*` (باستثناء `GET /api/health`) — انظر `docs/adr/` والكود في `src/app.py`. التفاصيل والتحقق في `tests/test_security.py` و`FINAL_VERIFICATION.md`.
+طبقة Default-Deny على `/api/*` (باستثناء `GET /api/health`) — التفاصيل الكاملة في `docs/API.md`، والتحقق في `tests/test_security.py`.
 
 ## ما لا يعكسه هذا المخطط (قصداً)
 - `web/` غير مرسومة كمسار تشغيل حقيقي لأن **حالة نشرها الفعلية غير قابلة للتحقق من هذه البيئة (UNKNOWN)** — رسمها كمسار "يعمل" سيكون ادعاءً غير موثَّق.
-- بيئات Replit/Docker/Railway الفعلية: حالة كل منها موثقة في `FINAL_VERIFICATION.md` (§Environment Matrix) وليس هنا، لأن هذا الملف عن البنية لا عن حالة التشغيل الخارجي.
+- بيئات Replit/Docker/Railway الفعلية: لا يوجد تحقق تشغيلي حي منها من بيئة العمل المستخدَمة طوال هذه المهمة (UNKNOWN بصراحة، غير مُدَّعاة أبداً كـ PASS).

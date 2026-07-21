@@ -42,9 +42,12 @@ python src/app.py
 
 ### API
 
+> ⚠️ **منذ Phase 1 (Production Safety)**: كل `/api/*` محمي افتراضياً (Default Deny) عدا `GET /api/health`. يلزم هيدر `X-API-Key`. إن لم تُضبط `ADMIN_API_KEY` كمتغيّر بيئة صراحةً، يُولَّد مفتاح عشوائي مؤقت ويُطبع مرة واحدة في سجلات الإقلاع (stdout) - غير ثابت بين إعادة التشغيل.
+
 ```bash
 curl -X POST http://localhost:5000/api/build \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{"description": "صفحة هبوط لشركة ناشئة"}'
 ```
 
@@ -95,6 +98,8 @@ curl -X POST http://localhost:5000/api/build \
 
 ## 🏗️ الهيكل المعماري (v1.0)
 
+> هذا مخطط v1.0 المبسَّط الأصلي. للصورة الكاملة المُتحقَّقة فعلياً (بما فيها طبقة `src/Core/*` وربطها الحقيقي، نظام القدرات files/git، ومحرك التنفيذ) انظر `docs/ARCHITECTURE.md` و`docs/adr/012-canonical-architecture.md` و`docs/adr/013-src-core-architectural-status.md`.
+
 ```
 build.py (CLI)
     ↓
@@ -135,12 +140,14 @@ ProjectManager + Pipeline + Logger + Memory
 
 - Python 3.11+
 - Flask (API)
-- localStorage (البيانات)
-- Markdown (التقارير)
+- ملفات Markdown/JSON على القرص (`STORAGE_BACKEND=markdown`، الافتراضي) + ChromaDB اختياري لبحث دلالي
+- Mock/Gemini/OpenAI كطبقة مزوّدي LLM قابلة للتهيئة (انظر §المزوّدون أدناه)
 
 ---
 
 ## التطور
+
+> ⚠️ ترقيم "Phase" في هذا الجدول هو ترقيم المشروع التاريخي الأصلي (v1.0 وحتى v10 المخطَّطة)، **مختلف تماماً** عن ترقيم "Phase 1-7" في `CHANGELOG.md` (مهمة معالجة/تصليب منفصلة: أمان، معمارية، مسارات، مزوّدين، قدرات، تنفيذ، ذاكرة قرارات). لا تخلط بين الترقيمين.
 
 | المرحلة | الحالة |
 |---------|--------|
@@ -212,12 +219,20 @@ heroku open
 
 | المتغير | الوصف | القيمة الافتراضية |
 |---------|-------|-----------------|
-| `PORT` | منفذ الخادم | 8000 |
+| `PORT` | منفذ الخادم | ⚠️ يختلف فعلياً حسب المنصة (Render يضبط 10000، Railway/`.env.example` يضبط 8000، `config/settings.py` الداخلي 5000 إن غاب `FLASK_PORT`) - اضبطه صراحةً في بيئتك بدل الاعتماد على تطابق افتراضي واحد |
 | `HOST` | عنوان الخادم | 0.0.0.0 |
 | `FLASK_ENV` | بيئة Flask | production |
 | `FLASK_DEBUG` | وضع التصحيح | false |
-| `SECRET_KEY` | مفتاح سري | generated |
+| `SECRET_KEY` | مفتاح جلسات Flask | ⚠️ له fallback مكشوف في الكود إن غاب من env (Render يولّده تلقائياً `generateValue: true`؛ غيرها لا - اضبطه صراحةً) |
+| `ADMIN_API_KEY` | **(Phase 1)** مفتاح مصادقة كل `/api/*` عدا `/api/health` | إن غاب: مفتاح عشوائي مؤقت يُطبع في سجلات الإقلاع، يتغيّر كل إعادة تشغيل |
+| `GEMINI_API_KEY` | **(Phase 4)** تفعيل مزوّد Gemini الحقيقي | (فارغ = غير مُفعَّل) |
+| `OPENAI_API_KEY` | **(Phase 4)** تفعيل مزوّد OpenAI الحقيقي | (فارغ = غير مُفعَّل) |
+| `PROVIDER_ORDER` | **(Phase 4)** ترتيب Fallback بين المزوّدين، مثال `gemini,openai,mock` | `gemini,openai,mock` |
+| `MOCK_PROVIDER_ENABLED` | **(Phase 4)** السماح بتفعيل Mock تلقائياً إن لم يتوفر مزوّد حقيقي | `true` |
+| `WORKSPACE_ROOT` | **(Phase 3)** جذر الملفات الفعلي (تجاوز صريح) | موقع الملف الفعلي لو غاب - **لا** يُفترض `/app` على Railway بعد الآن |
 | `LOG_LEVEL` | مستوى السجلات | INFO |
+
+بلا أي مفتاح LLM حقيقي مضبوط: النظام يعمل بـ `mode: mock` (نص مُولَّد بمطابقة أنماط، **ليس** استدلال نموذج حقيقي) - مرئي صراحةً في `GET /api/health`.
 
 ---
 
