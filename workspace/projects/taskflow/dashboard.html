@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - TaskFlow Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo">
+                    <span class="logo-icon">📋</span>
+                    <span>TaskFlow Pro</span>
+                </a>
+                
+                <nav class="header-nav">
+                    <a href="dashboard.html" class="nav-link active">لوحة التحكم</a>
+                    <a href="tasks.html" class="nav-link">المهام</a>
+                    <a href="team.html" class="nav-link">الفريق</a>
+                    <a href="reports.html" class="nav-link">التقارير</a>
+                    <a href="settings.html" class="nav-link">الإعدادات</a>
+                </nav>
+                
+                <div class="user-menu dropdown">
+                    <span class="user-avatar">👤</span>
+                    <div class="user-info">
+                        <span class="user-name" id="user-name">أحمد محمد</span>
+                        <span class="user-role" id="user-role">مدير</span>
+                    </div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                            ⚙️ الإعدادات
+                        </div>
+                        <div class="dropdown-item" onclick="handleLogout()">
+                            🚪 تسجيل الخروج
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content page-transition">
+        <div class="container">
+            <h1 class="mb-4">لوحة التحكم</h1>
+            
+            <!-- Stats Grid -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">📋</div>
+                        <span class="stat-trend up">+12%</span>
+                    </div>
+                    <div class="stat-value" id="total-tasks">15</div>
+                    <div class="stat-label">إجمالي المهام</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">✅</div>
+                    </div>
+                    <div class="stat-value" id="completed-tasks">4</div>
+                    <div class="stat-label">مهام مكتملة</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon purple">🔄</div>
+                    </div>
+                    <div class="stat-value" id="inprogress-tasks">5</div>
+                    <div class="stat-label">قيد التنفيذ</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">⏳</div>
+                    </div>
+                    <div class="stat-value" id="pending-tasks">6</div>
+                    <div class="stat-label">مهام معلقة</div>
+                </div>
+            </div>
+            
+            <!-- Charts & Activity -->
+            <div class="two-column">
+                <div>
+                    <!-- Tasks by Status -->
+                    <div class="chart-container mb-4">
+                        <h3 class="chart-title">نسبة الإنجاز</h3>
+                        <div class="donut-chart">
+                            <div class="progress-ring">
+                                <svg width="120" height="120">
+                                    <circle class="progress-ring-bg" cx="60" cy="60" r="45"/>
+                                    <circle class="progress-ring-fill" id="completion-ring" cx="60" cy="60" r="45"
+                                            stroke-dasharray="283" stroke-dashoffset="283"/>
+                                </svg>
+                                <div class="progress-ring-text">
+                                    <div class="progress-ring-value" id="completion-percentage">0%</div>
+                                    <div class="progress-ring-label">مكتمل</div>
+                                </div>
+                            </div>
+                            <div class="donut-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--success)"></div>
+                                    <span>مكتمل</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--info)"></div>
+                                    <span>قيد التنفيذ</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--warning)"></div>
+                                    <span>معلق</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Chart -->
+                    <div class="chart-container">
+                        <h3 class="chart-title">إنتاجية الفريق</h3>
+                        <div class="bar-chart" id="performance-chart"></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <!-- Today's Tasks -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title">مهام اليوم</h3>
+                            <a href="tasks.html" class="btn btn-sm btn-secondary">عرض الكل</a>
+                        </div>
+                        <div class="task-list-widget" id="today-tasks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Team Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">نشاط الفريق</h3>
+                        </div>
+                        <div class="activity-feed" id="dashboard-activity">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <h3 class="card-title mb-3">إجراءات سريعة</h3>
+                <div class="quick-actions">
+                    <a href="tasks.html" class="quick-action">
+                        <span class="quick-action-icon">➕</span>
+                        <span>إنشاء مهمة جديدة</span>
+                    </a>
+                    <a href="team.html" class="quick-action">
+                        <span class="quick-action-icon">👥</span>
+                        <span>إدارة الفريق</span>
+                    </a>
+                    <a href="reports.html" class="quick-action">
+                        <span class="quick-action-icon">📊</span>
+                        <span>عرض التقارير</span>
+                    </a>
+                    <a href="settings.html" class="quick-action">
+                        <span class="quick-action-icon">⚙️</span>
+                        <span>الإعدادات</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer" style="margin-top: 2rem;">
+        <div class="container">
+            <p>TaskFlow Pro © 2026 - نظام إدارة المهام</p>
+        </div>
+    </footer>
+    
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/reports.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!requireAuth()) return;
+            
+            // Update user info
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('user-name').textContent = user.name;
+                document.getElementById('user-role').textContent = getRoleDisplay(user.role);
+            }
+            
+            // Load dashboard data
+            loadDashboardData();
+        });
+        
+        function loadDashboardData() {
+            // Stats
+            const stats = getStats();
+            document.getElementById('total-tasks').textContent = stats.totalTasks;
+            document.getElementById('completed-tasks').textContent = stats.completedTasks;
+            document.getElementById('inprogress-tasks').textContent = stats.inProgressTasks;
+            document.getElementById('pending-tasks').textContent = stats.pendingTasks;
+            
+            // Completion ring
+            const completionRate = stats.totalTasks > 0 
+                ? Math.round((stats.completedTasks / stats.totalTasks) * 100) 
+                : 0;
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (completionRate / 100) * circumference;
+            document.getElementById('completion-ring').style.strokeDashoffset = offset;
+            document.getElementById('completion-percentage').textContent = completionRate + '%';
+            
+            // Performance chart
+            renderTeamPerformanceChart();
+            
+            // Today's tasks
+            loadTodayTasks();
+            
+            // Activity feed
+            loadDashboardActivity();
+        }
+        
+        function loadTodayTasks() {
+            const container = document.getElementById('today-tasks');
+            const tasks = getTasks()
+                .filter(t => t.status !== 'completed')
+                .slice(0, 5);
+            
+            if (tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><div>لا توجد مهام معلقة!</div></div>';
+                return;
+            }
+            
+            container.innerHTML = tasks.map(task => `
+                <div class="task-item">
+                    <input type="checkbox" class="task-checkbox" ${task.status === 'completed' ? 'checked' : ''}>
+                    <div class="task-info">
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                        <div class="task-meta">
+                            <span class="${getPriorityClass(task.priority)}">${getPriorityIcon(task.priority)}</span>
+                            <span>${formatDate(task.dueDate)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function loadDashboardActivity() {
+            const container = document.getElementById('dashboard-activity');
+            const activities = getActivityLog(5);
+            
+            if (activities.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div>لا يوجد نشاط حديث</div></div>';
+                return;
+            }
+            
+            container.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon">📝</div>
+                    <div class="activity-content">
+                        <div class="activity-text">${activity.details}</div>
+                        <div class="activity-time">${getRelativeTime(activity.timestamp)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

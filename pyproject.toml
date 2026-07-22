@@ -1,0 +1,94 @@
+[project]
+name = "codeforge"
+version = "1.0.0"
+description = "منصة بناء المشاريع بالذكاء الاصطناعي - AI-Powered Project Building Platform"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "CodeForge Team", email = "team@codeforge.dev"}
+]
+keywords = ["multi-agent", "ai", "development", "automation", "crewai", "openhands", "flask"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Build Tools",
+]
+
+dependencies = [
+    "flask>=3.0.0",
+    "gunicorn>=21.0.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+full = [
+    "crewai>=1.15.0",
+    "crewai-tools>=1.15.0",
+    "litellm>=1.0.0",
+]
+
+[project.scripts]
+codeforge = "src.app:main"
+
+[[tool.setuptools.packages.find]]
+where = ["src"]
+
+[project.urls]
+Homepage = "https://github.com/angaaamy-cpu/codeforge"
+Documentation = "https://github.com/angaaamy-cpu/codeforge/docs"
+Repository = "https://github.com/codeforge/codeforge"
+Issues = "https://github.com/codeforge/codeforge/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "--cov=src --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+include = '\.pyi?$'
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

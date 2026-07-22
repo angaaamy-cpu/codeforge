@@ -1,0 +1,28 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Force Unix line endings for these file types
+*.py      text eol=lf
+*.md      text eol=lf
+*.txt     text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.json    text eol=lf
+*.toml    text eol=lf
+*.cfg     text eol=lf
+*.ini     text eol=lf
+*.sh      text eol=lf
+*.bash    text eol=lf
+
+# Denote all files that are truly binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.tar  binary
+*.whl  binary
+*.egg  binary

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفريق - TaskFlow Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo">
+                    <span class="logo-icon">📋</span>
+                    <span>TaskFlow Pro</span>
+                </a>
+                
+                <nav class="header-nav">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                    <a href="tasks.html" class="nav-link">المهام</a>
+                    <a href="team.html" class="nav-link active">الفريق</a>
+                    <a href="reports.html" class="nav-link">التقارير</a>
+                    <a href="settings.html" class="nav-link">الإعدادات</a>
+                </nav>
+                
+                <div class="user-menu">
+                    <span class="user-avatar">👤</span>
+                    <div class="user-info">
+                        <span class="user-name">أحمد محمد</span>
+                        <span class="user-role">مدير</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content page-transition">
+        <div class="container">
+            <h1 class="mb-4">الفريق</h1>
+            
+            <!-- Team Stats -->
+            <div class="dashboard-grid mb-4" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="stat-card">
+                    <div class="stat-icon blue">👥</div>
+                    <div class="stat-value" id="total-members">5</div>
+                    <div class="stat-label">إجمالي الأعضاء</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">🟢</div>
+                    <div class="stat-value" id="online-members">3</div>
+                    <div class="stat-label">متصلون الآن</div>
+                </div>
+            </div>
+            
+            <!-- Team Grid -->
+            <div class="card mb-4">
+                <h3 class="card-title mb-3">أعضاء الفريق</h3>
+                <div class="team-widget" id="team-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <!-- Team Table -->
+            <div class="card">
+                <h3 class="card-title mb-3">جدول الفريق</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>البريد</th>
+                                <th>الدور</th>
+                                <th>القسم</th>
+                                <th>المهام</th>
+                                <th>المكتملة</th>
+                                <th>تاريخ الانضمام</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="team-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Edit Member Modal -->
+    <div class="modal-overlay" id="edit-member-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">تعديل العضو</h3>
+                <button class="modal-close" onclick="hideModal('edit-member-modal')">&times;</button>
+            </div>
+            <form onsubmit="handleEditMemberSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="edit-member-email">
+                    
+                    <div class="form-group">
+                        <label class="form-label">الاسم</label>
+                        <input type="text" id="edit-member-name" class="form-input" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-member-role">الدور</label>
+                        <select id="edit-member-role" class="form-select">
+                            <option value="manager">مدير</option>
+                            <option value="member">عضو</option>
+                            <option value="viewer">زائر</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-member-status">الحالة</label>
+                        <select id="edit-member-status" class="form-select">
+                            <option value="online">متصل</option>
+                            <option value="away">بعيد</option>
+                            <option value="offline">غير متصل</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('edit-member-modal')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/team.js"></script>
+</body>
+</html>

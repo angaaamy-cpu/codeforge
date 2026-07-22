@@ -1,0 +1,44 @@
+# render.yaml - Render Deployment Configuration
+# ============================================
+# https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: codeforge
+    runtime: python
+    region: oregon
+    plan: free
+    branch: master
+    rootDir: .
+    
+    # Build command
+    buildCommand: |
+      pip install -e .
+    
+    # Start command - uses gunicorn
+    startCommand: gunicorn src.app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4
+    
+    # Environment variables
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LOG_LEVEL
+        value: INFO
+    
+    # Health check
+    healthCheckPath: /api/health
+    
+    # Auto deploy
+    autoDeploy: true
+
+# Cron Jobs (optional)
+# cron:
+#   - name: daily-backup
+#     schedule: "0 2 * * *"
+#     command: python scripts/backup.py
