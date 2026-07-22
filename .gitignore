@@ -68,6 +68,7 @@ Thumbs.db
 
 # ChromaDB (Phase 3)
 .chroma/
+data/*.json
 
 # Logs
 *.log
