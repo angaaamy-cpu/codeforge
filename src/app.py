@@ -387,6 +387,34 @@ def api_adrs():
 
 
 # ============================================================
+# API - Knowledge Graph (مهمة المعالجة/التصليب Phase 8 - غير مرتبطة
+# برقم "Phase 8" الأصلي للمشروع أدناه (Build)، انظر CHANGELOG.md لتفادي الالتباس)
+# ============================================================
+
+@app.route("/api/knowledge/graph", methods=["GET"])
+def api_knowledge_graph():
+    """الرسم البياني الكامل - يُعاد بناؤه من المصادر الحقيقية في كل استدعاء
+    (لا cache قد ينحرف عن الحقيقة)، ثم يُكتَب لملف JSON عبر path_service."""
+    try:
+        from src.Core.knowledge_graph import build_and_persist_graph
+        return jsonify(build_and_persist_graph())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/knowledge/impact/<node_id>", methods=["GET"])
+def api_knowledge_impact(node_id):
+    """تحليل الأثر الحقيقي لعقدة معيّنة - مثال: decision:013 أو file:src/app.py"""
+    try:
+        from src.Core.knowledge_graph import get_impact_analysis
+        result = get_impact_analysis(node_id)
+        status = 200 if result.get("found") else 404
+        return jsonify(result), status
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================
 # API - Build - Phase 8
 # ============================================================
 

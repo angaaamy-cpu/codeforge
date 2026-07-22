@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — الحالة الفعلية المُتحقَّقة (محدَّث حتى Phase 7)
+# ARCHITECTURE.md — الحالة الفعلية المُتحقَّقة (محدَّث حتى Phase 8)
 
 > هذا المستند يعكس **ما يعمل فعلياً** بدليل مباشر (تتبع استيراد + اختبار تشغيل)، وليس النية الأصلية. للقرار الرسمي انظر `docs/adr/012-canonical-architecture.md`. للتفاصيل الجنائية الكاملة انظر `AUDIT_REPORT.md`. لسجل التغييرات الكامل انظر `CHANGELOG.md`.
 
@@ -35,6 +35,7 @@ flowchart TD
     BE --> PS[src/path_service.py]
     APP --> GIT[src/git_manager.py]
     APP --> ADRAPI["GET /api/adrs -> docs_storage.list_adrs()<br/>✅ fixed in Phase 7 (was always empty)"]
+    APP --> KGAPI["GET /api/knowledge/graph, /impact/&lt;id&gt;<br/>✅ Phase 8 - derived from real sources, see docs/KNOWLEDGE_GRAPH.md"]
 
     subgraph Disconnected["منفصل تماماً - لا استيراد من أي مسار منشور"]
         AGENTS["src/agents.py (CrewAI)<br/>❌ dead code"]
