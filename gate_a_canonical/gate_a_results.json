@@ -1,0 +1,16 @@
+{
+  "MISSION_ID": "MISSION-6D9599FC",
+  "TASK_ID": "TASK-3251AB93",
+  "PLAN_ID": "PLAN-A1ACF6BB",
+  "WORKER_ID": "WORKER-D8EC6AF1",
+  "WORKSPACE_PATH": "/workspace/project/codeforge/gate_a_canonical",
+  "FILE_CREATED": "/workspace/project/codeforge/gate_a_canonical/hello_canonical.txt",
+  "FILE_EXISTS": true,
+  "FILE_VERIFIED": true,
+  "COMMIT_HASH": "5f1571b",
+  "COMMIT_VERIFIED": true,
+  "EVIDENCE_RECORDS": 4,
+  "EVIDENCE_FILE": "/workspace/project/codeforge/gate_a_canonical/production_evidence_records.json",
+  "ALL_COMPLETED": true,
+  "PROVENANCE_COMPLETE": true
+}
