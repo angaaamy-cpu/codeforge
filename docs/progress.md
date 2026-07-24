@@ -132,3 +132,4 @@ python src/app.py
 
 افتح: http://localhost:5000
 | project-test-direct-project | created | 2026-07-24 01:02 | ✅ created | test-direct-project |
+| project-test-direct-project | created | 2026-07-24 01:04 | ✅ created | test-direct-project |
