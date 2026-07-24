@@ -1,5 +1,20 @@
 # سجل التقدم
 
+## المرحلة 5: Capability System ✅ (2026-07-24)
+
+**تاريخ البدء**: 2026-07-23
+**تاريخ الانتهاء**: 2026-07-24
+**الحالة**: ✅ مكتملة
+
+### ما تم إنجازه:
+- نظام القدرات (Capabilities) للملفات و Git
+- أدوات الملفات: read, write, list, delete, exists
+- أدوات Git: status, changed_files, current_branch, auto_commit
+- قرار أمان: terminal/browser لم يتم ربطها (ستأتي لاحقاً)
+- اختبارات: `tests/test_capability_phase5.py` (7/7 passed)
+
+---
+
 ## المرحلة 3: Runtime Stability ✅ (2026-07-24)
 
 **تاريخ البدء**: 2026-07-23
