@@ -36,7 +36,15 @@ CURRENT_PHASE = "phase8.1"
 FLASK_HOST = os.environ.get("FLASK_HOST", "0.0.0.0")
 FLASK_PORT = int(os.environ.get("FLASK_PORT", "5000"))
 FLASK_DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
-SECRET_KEY = os.environ.get("SECRET_KEY", "codeforge-secret-key-change-in-production")
+# Phase 0 fix (R2): No hardcoded fallback. Generate ephemeral key if absent — same
+# pattern as ADMIN_API_KEY. Hardcoded secrets in public source code violate OWASP A02.
+import secrets as _sk_secrets
+_SECRET_KEY_ENV = os.environ.get("SECRET_KEY", "").strip()
+SECRET_KEY = _SECRET_KEY_ENV if _SECRET_KEY_ENV else _sk_secrets.token_urlsafe(32)
+SECRET_KEY_IS_EPHEMERAL = not bool(_SECRET_KEY_ENV)
+if SECRET_KEY_IS_EPHEMERAL:
+    print("⚠️  SECRET_KEY غير مضبوط — مفتاح عشوائي مؤقت، يتغيّر عند كل إعادة تشغيل.")
+    print("   اضبط SECRET_KEY في متغيرات البيئة للإنتاج.")
 
 # ============================================================
 # Phase 1: API Authentication (Temporary Admin Authentication)

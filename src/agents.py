@@ -10,7 +10,15 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
-from crewai import Agent, Task, Crew, Process
+# Phase 0 fix (R6): Guard crewai import — this module is dead code (ADR-013) but
+# the hard import crashes the process when crewai is not installed.
+try:
+    from crewai import Agent, Task, Crew, Process
+    CREWAI_AVAILABLE = True
+except ImportError:
+    Agent = Task = Crew = Process = None  # type: ignore
+    CREWAI_AVAILABLE = False
+
 try:
     from crewai_tools import FileReadTool, FileWriterTool as FileWriteTool
 except ImportError:
