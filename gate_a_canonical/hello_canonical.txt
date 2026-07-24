@@ -1,0 +1,12 @@
+GATE A - CANONICAL EXECUTION PATH
+========================================
+Timestamp: 2026-07-24T02:54:34.430277+00:00
+Mission ID: MISSION-975BDDDB
+Task ID: TASK-04FC5DA0
+Plan ID: PLAN-DE67AA73
+Worker ID: WORKER-92CEE71C
+
+Canonical Path:
+API → Mission → Task → Execution Plan → ExecutionEngine →
+Worker Runtime → Workspace Manager → Filesystem → Git →
+EvidenceCollector → Evidence Store
