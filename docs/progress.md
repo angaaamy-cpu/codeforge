@@ -131,3 +131,4 @@ python src/app.py
 ```
 
 افتح: http://localhost:5000
+| project-test-direct-project | created | 2026-07-24 00:43 | ✅ created | test-direct-project |
